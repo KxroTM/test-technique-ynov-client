@@ -587,7 +587,7 @@ client ne peut donc pas désigner l'utilisateur pour lequel il prétend agir.
 
 <h3>4.1 Dépôt serveur</h3>
 
-<pre><code>cmd/api/main.go        Point d'entrée : assemblage des briques, démarrage,
+<pre><code>main.go                Point d'entrée : assemblage des briques, démarrage,
                        arrêt propre. Aucune logique métier.
 internal/
   apperrors/           Erreurs métier, indépendantes de HTTP
@@ -603,7 +603,7 @@ docs/                  Cette documentation</code></pre>
 
 <h3>4.2 Dépôt client</h3>
 
-<pre><code>cmd/web/main.go        Point d'entrée : assemblage, démarrage, arrêt propre
+<pre><code>main.go                Point d'entrée : assemblage, démarrage, arrêt propre
 internal/
   api/                 Client HTTP typé : seul à connaître les routes de l'API
   config/              Configuration lue dans l'environnement
@@ -1452,13 +1452,13 @@ git clone https://github.com/KxroTM/test-technique-ynov.git
 cd test-technique-ynov
 cp .env.example .env
 docker compose up -d        # PostgreSQL + schéma + données de démonstration
-go run ./cmd/api            # API sur http://localhost:8080
+go run .                    # API sur http://localhost:8080
 
 # 2. Client, dans un autre terminal
 git clone https://github.com/KxroTM/test-technique-ynov-client.git
 cd test-technique-ynov-client
 cp .env.example .env
-go run ./cmd/web            # Application sur http://localhost:3000</code></pre>
+go run .                    # Application sur http://localhost:3000</code></pre>
 
 <p>
 Les valeurs par défaut des deux <code>.env.example</code> sont fonctionnelles

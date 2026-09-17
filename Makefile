@@ -8,11 +8,11 @@ help: ## Affiche la liste des commandes disponibles
 
 .PHONY: run
 run: ## Lance le client web
-	go run ./cmd/web
+	go run .
 
 .PHONY: build
 build: ## Compile le client dans bin/
-	go build -o bin/web ./cmd/web
+	go build -o bin/web .
 
 .PHONY: test
 test: ## Lance l'ensemble des tests
