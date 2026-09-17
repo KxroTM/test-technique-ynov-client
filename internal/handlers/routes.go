@@ -9,9 +9,19 @@ import "net/http"
 // (« POST /spaces/{spaceID}/delete »), ce qui rend toute dépendance à un
 // routeur tiers superflue pour une application de cette taille.
 //
-// L'affichage d'un formulaire et son traitement partagent la même adresse,
-// distingués par la méthode : GET affiche, POST enregistre. L'URL visible
-// dans la barre d'adresse reste donc la même en cas d'erreur de saisie.
+// Deux partis pris sont visibles dans cette table de routes.
+//
+// D'abord, les modifications passent toutes par POST. Un formulaire HTML ne
+// sait émettre que GET et POST : les verbes PUT et DELETE lui sont
+// inaccessibles. Le client expose donc des routes POST explicites
+// (« /spaces/{id}/delete »), et c'est le client API qui les traduit en PUT et
+// DELETE vers le serveur. L'API REST reste ainsi correcte, et l'application
+// fonctionne sans une ligne de JavaScript.
+//
+// Ensuite, l'affichage d'un formulaire et son traitement partagent la même
+// adresse, distingués par la méthode : GET affiche, POST enregistre. L'URL
+// visible dans la barre d'adresse reste donc la même en cas d'erreur de
+// saisie.
 func (h *Handler) Routes(staticHandler http.Handler) *http.ServeMux {
 	mux := http.NewServeMux()
 
@@ -35,6 +45,13 @@ func (h *Handler) Routes(staticHandler http.Handler) *http.ServeMux {
 	mux.HandleFunc("GET /spaces/{spaceID}/edit", h.requireAuth(h.EditSpace))
 	mux.HandleFunc("POST /spaces/{spaceID}/edit", h.requireAuth(h.UpdateSpace))
 	mux.HandleFunc("POST /spaces/{spaceID}/delete", h.requireAuth(h.DeleteSpace))
+
+	// Notes.
+	mux.HandleFunc("GET /spaces/{spaceID}/notes/new", h.requireAuth(h.NewNote))
+	mux.HandleFunc("POST /spaces/{spaceID}/notes/new", h.requireAuth(h.CreateNote))
+	mux.HandleFunc("GET /notes/{noteID}/edit", h.requireAuth(h.EditNote))
+	mux.HandleFunc("POST /notes/{noteID}/edit", h.requireAuth(h.UpdateNote))
+	mux.HandleFunc("POST /notes/{noteID}/delete", h.requireAuth(h.DeleteNote))
 
 	// Route attrape-tout : toute adresse non reconnue ci-dessus atterrit ici.
 	// Sans elle, le routeur répondrait le « 404 page not found » brut de la
