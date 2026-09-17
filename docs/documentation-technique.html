@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Documentation technique — Application de gestion de notes par espaces</title>
+<style>
+/*
+ * Feuille de style de la documentation technique.
+ * Le document est écrit en HTML puis converti en PDF par Chrome en mode
+ * headless : le format source reste ainsi versionnable et diffable.
+ */
+
+@page {
+    size: A4;
+    margin: 18mm 16mm 20mm 16mm;
+}
+
+:root {
+    --text: #1d2430;
+    --muted: #5c6675;
+    --border: #d8dde4;
+    --accent: #2456c4;
+    --code-bg: #f5f6f8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    color: var(--text);
+}
+
+h1, h2, h3, h4 { line-height: 1.25; }
+
+h1 {
+    font-size: 19pt;
+    margin: 0 0 6pt;
+}
+
+h2 {
+    font-size: 14pt;
+    margin: 22pt 0 8pt;
+    padding-bottom: 4pt;
+    border-bottom: 1.5px solid var(--accent);
+    /* Une section ne doit pas commencer en bas d'une page. */
+    break-after: avoid;
+}
+
+h3 {
+    font-size: 11.5pt;
+    margin: 14pt 0 5pt;
+    color: var(--accent);
+    break-after: avoid;
+}
+
+h4 {
+    font-size: 10.5pt;
+    margin: 10pt 0 3pt;
+    break-after: avoid;
+}
+
+p { margin: 0 0 7pt; }
+
+ul, ol {
+    margin: 0 0 8pt;
+    padding-left: 18pt;
+}
+
+li { margin-bottom: 3pt; }
+
+code {
+    padding: 1px 3px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 9.2pt;
+    background: var(--code-bg);
+    border-radius: 2px;
+}
+
+pre {
+    padding: 8pt 10pt;
+    margin: 0 0 9pt;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 8.6pt;
+    line-height: 1.42;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    /* Un bloc de code ne doit pas être coupé entre deux pages. */
+    break-inside: avoid;
+    white-space: pre;
+    overflow-x: hidden;
+}
+
+pre code {
+    padding: 0;
+    background: none;
+    font-size: inherit;
+}
+
+table {
+    width: 100%;
+    margin: 0 0 10pt;
+    border-collapse: collapse;
+    font-size: 9.4pt;
+    break-inside: avoid;
+}
+
+th, td {
+    padding: 4.5pt 6pt;
+    text-align: left;
+    vertical-align: top;
+    border: 1px solid var(--border);
+}
+
+th {
+    font-weight: 600;
+    background: var(--code-bg);
+}
+
+.muted { color: var(--muted); }
+
+/* --- Page de titre --- */
+
+.cover {
+    height: 250mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    break-after: page;
+}
+
+.cover-kicker {
+    font-size: 10pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.cover h1 {
+    font-size: 25pt;
+    margin: 10pt 0;
+}
+
+.cover-subtitle {
+    font-size: 12.5pt;
+    color: var(--muted);
+    margin-bottom: 26pt;
+}
+
+.cover-meta {
+    display: inline-block;
+    margin: 0 auto;
+    padding: 12pt 20pt;
+    font-size: 10pt;
+    text-align: left;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+.cover-meta div { margin-bottom: 4pt; }
+.cover-meta div:last-child { margin-bottom: 0; }
+
+/* --- Sommaire --- */
+
+.toc { break-after: page; }
+
+.toc ol {
+    padding-left: 16pt;
+    font-size: 10pt;
+}
+
+.toc > ol > li {
+    margin-bottom: 5pt;
+    font-weight: 600;
+}
+
+.toc ol ol {
+    margin-top: 3pt;
+    font-weight: 400;
+}
+
+.toc ol ol li { margin-bottom: 1.5pt; }
+
+/* --- Encadrés --- */
+
+.note {
+    padding: 8pt 11pt;
+    margin: 0 0 10pt;
+    font-size: 9.8pt;
+    background: #f3f7ff;
+    border-left: 3px solid var(--accent);
+    break-inside: avoid;
+}
+
+.note-title {
+    display: block;
+    margin-bottom: 3pt;
+    font-weight: 600;
+}
+
+.limit {
+    padding: 8pt 11pt;
+    margin: 0 0 10pt;
+    font-size: 9.8pt;
+    background: #fdf6ee;
+    border-left: 3px solid #cc8b2a;
+    break-inside: avoid;
+}
+
+/* --- Schémas --- */
+
+figure {
+    margin: 0 0 12pt;
+    break-inside: avoid;
+}
+
+figcaption {
+    margin-top: 4pt;
+    font-size: 9pt;
+    color: var(--muted);
+    text-align: center;
+}
+
+svg { display: block; margin: 0 auto; }
+
+.page-break { break-before: page; }
+</style>
+</head>
+<body>
+
+<!-- ===================================================================== -->
+<!-- Page de titre                                                          -->
+<!-- ===================================================================== -->
+
+<section class="cover">
+    <p class="cover-kicker">Documentation technique</p>
+    <h1>Application de gestion de notes<br>organisées par espaces</h1>
+    <p class="cover-subtitle">Architecture client-serveur en Go</p>
+
+    <div class="cover-meta">
+        <div><strong>Contexte</strong> — Test technique, poste de mentor<br>
+            <span class="muted">Filière Informatique &amp; Cybersécurité</span></div>
+        <div><strong>Auteur</strong> — Youssef Ammari</div>
+        <div><strong>Dépôt serveur</strong> — <code>test-technique-ynov</code></div>
+        <div><strong>Dépôt client</strong> — <code>test-technique-ynov-client</code></div>
+    </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- Sommaire                                                               -->
+<!-- ===================================================================== -->
+
+<section class="toc">
+    <h2 style="margin-top:0">Sommaire</h2>
+    <ol>
+        <li>Présentation et périmètre
+            <ol>
+                <li>Le besoin fonctionnel</li>
+                <li>Couverture des fonctionnalités demandées</li>
+            </ol>
+        </li>
+        <li>Choix techniques
+            <ol>
+                <li>Tableau de synthèse</li>
+                <li>Justification des choix structurants</li>
+                <li>Ce qui a été volontairement écarté</li>
+            </ol>
+        </li>
+        <li>Architecture globale
+            <ol>
+                <li>Vue d'ensemble</li>
+                <li>Flux d'une requête authentifiée</li>
+                <li>Répartition des responsabilités</li>
+            </ol>
+        </li>
+        <li>Organisation du code
+            <ol>
+                <li>Dépôt serveur</li>
+                <li>Dépôt client</li>
+                <li>Règle de dépendance</li>
+            </ol>
+        </li>
+        <li>Modélisation des données
+            <ol>
+                <li>Entités et relations</li>
+                <li>Schéma relationnel</li>
+                <li>Invariants garantis par la base</li>
+            </ol>
+        </li>
+        <li>Partis pris d'implémentation
+            <ol>
+                <li>Authentification</li>
+                <li>Contrôle d'accès aux données</li>
+                <li>Gestion des erreurs</li>
+                <li>Validation des données</li>
+                <li>Persistance</li>
+                <li>Gestion des états de note</li>
+                <li>Contraintes propres au client HTML</li>
+            </ol>
+        </li>
+        <li>Stratégie de tests</li>
+        <li>Méthode de travail et versionnement</li>
+        <li>Limites, simplifications et compromis</li>
+        <li>Mise en route</li>
+    </ol>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 1. Présentation                                                        -->
+<!-- ===================================================================== -->
+
+<h2>1. Présentation et périmètre</h2>
+
+<h3>1.1 Le besoin fonctionnel</h3>
+
+<p>
+L'application permet à un utilisateur authentifié d'organiser ses notes dans
+des <strong>espaces</strong> thématiques : « Devoirs », « Jobs »,
+« Personnel »… Un espace doit exister avant qu'une note puisse y être ajoutée,
+et chaque note appartient obligatoirement à un espace.
+</p>
+
+<p>
+La règle transversale, qui structure l'ensemble de la solution, est la
+suivante : <strong>un utilisateur ne doit jamais pouvoir consulter ni modifier
+les espaces et les notes d'un autre utilisateur.</strong> Cette contrainte
+n'est pas traitée comme une vérification ajoutée après coup, mais comme une
+propriété de la conception — la section 6.2 détaille comment.
+</p>
+
+<h3>1.2 Couverture des fonctionnalités demandées</h3>
+
+<table>
+    <tr><th style="width:12%">Réf.</th><th style="width:40%">Fonctionnalité</th><th>Réalisation</th></tr>
+    <tr><td>FT1</td><td>Authentification</td><td>Inscription et connexion par email et mot de passe, jeton JWT, comptes de démonstration fournis</td></tr>
+    <tr><td>FT2</td><td>Gestion des espaces</td><td>Création, liste, consultation, modification, suppression</td></tr>
+    <tr><td>FT3</td><td>Consultation des notes d'un espace</td><td>Notes affichées par espace, avec leur état</td></tr>
+    <tr><td>FT4</td><td>Création d'une note</td><td>Depuis un espace existant, rattachement automatique</td></tr>
+    <tr><td>FT5</td><td>Modification d'une note</td><td>Titre, contenu et état modifiables</td></tr>
+    <tr><td>FT6</td><td>Suppression d'une note</td><td>Réservée au propriétaire de l'espace</td></tr>
+</table>
+
+<div class="note">
+    <span class="note-title">Sur l'intitulé de FT6</span>
+    L'énoncé titre cette fonctionnalité « Une affectation des tâches », mais son
+    corps décrit la suppression d'une note par son propriétaire. C'est ce
+    contenu qui a été implémenté. Aucune notion d'affectation à un tiers n'a été
+    ajoutée : le modèle de données du sujet ne comporte qu'un seul utilisateur
+    par espace, et l'introduire aurait supposé une notion de partage absente de
+    l'énoncé.
+</div>
+
+<!-- ===================================================================== -->
+<!-- 2. Choix techniques                                                    -->
+<!-- ===================================================================== -->
+
+<h2>2. Choix techniques</h2>
+
+<h3>2.1 Tableau de synthèse</h3>
+
+<table>
+    <tr><th style="width:22%">Besoin</th><th style="width:26%">Choix</th><th>Raison</th></tr>
+    <tr><td>Langage (serveur et client)</td><td>Go 1.25</td><td>Imposé par le sujet</td></tr>
+    <tr><td>Routeur HTTP du serveur</td><td>Gin 1.12</td><td>Groupes de routes et middlewares concis, large adoption, documentation abondante</td></tr>
+    <tr><td>Routeur HTTP du client</td><td><code>net/http</code> (standard)</td><td>Depuis Go 1.22 la bibliothèque standard gère méthode et paramètres d'URL ; une quinzaine de routes ne justifie aucune dépendance</td></tr>
+    <tr><td>Base de données</td><td>PostgreSQL 16</td><td>Base relationnelle imposée ; clés étrangères, contraintes <code>CHECK</code> et index partiels natifs</td></tr>
+    <tr><td>Accès aux données</td><td><code>database/sql</code> + pilote pgx</td><td>SQL écrit à la main : chaque requête est lisible et explicable, le contrôle d'accès est visible dans la clause <code>WHERE</code></td></tr>
+    <tr><td>Hachage des mots de passe</td><td>bcrypt</td><td>Fonction lente et salée, conçue pour les mots de passe</td></tr>
+    <tr><td>Jetons d'authentification</td><td>JWT HS256 (<code>golang-jwt/jwt/v5</code>)</td><td>Imposé par le sujet ; API sans état</td></tr>
+    <tr><td>Validation des entrées</td><td><code>go-playground/validator</code> (via Gin)</td><td>Déjà présent dans Gin ; règles déclarées au plus près des structures de requête</td></tr>
+    <tr><td>Gabarits HTML</td><td><code>html/template</code></td><td>Imposé par le sujet ; échappement contextuel automatique</td></tr>
+    <tr><td>Style</td><td>CSS écrit à la main</td><td>Le sujet porte sur Go, pas sur le front</td></tr>
+    <tr><td>Environnement de développement</td><td>Docker Compose</td><td>Base de données jetable et reproductible en une commande</td></tr>
+</table>
+
+<h3>2.2 Justification des choix structurants</h3>
+
+<h4>SQL écrit à la main plutôt qu'un ORM</h4>
+
+<p>
+C'est le choix le plus déterminant du projet. Un ORM comme GORM aurait réduit
+le volume de code, mais le contrôle d'accès est ici la préoccupation centrale,
+et il s'exprime entièrement en SQL. Écrire les requêtes à la main rend visible,
+à la lecture d'une seule ligne, le fait qu'un utilisateur ne peut atteindre que
+ses propres données :
+</p>
+
+<pre><code>SELECT ... FROM spaces WHERE id = $1 AND user_id = $2</code></pre>
+
+<p>
+Avec un ORM, cette garantie serait diluée dans des appels chaînés dont le SQL
+généré n'est pas sous les yeux. Le coût assumé est un code plus verbeux :
+chaque <code>Scan</code> énumère ses colonnes.
+</p>
+
+<h4>Gin sur le serveur, bibliothèque standard sur le client</h4>
+
+<p>
+Les deux applications n'ont pas les mêmes besoins. Le serveur expose une API
+avec des groupes de routes, un middleware d'authentification appliqué à un
+groupe entier et un décodage JSON validé : Gin apporte là une réelle économie
+de code. Le client, lui, rend des gabarits et effectue des appels HTTP ; son
+routage tient en quinze lignes que la bibliothèque standard couvre depuis
+Go 1.22.
+</p>
+
+<p>
+Utiliser une dépendance là où elle sert, et s'en passer là où elle n'apporte
+rien, est un choix délibéré plutôt qu'une incohérence. Le dépôt du client ne
+déclare d'ailleurs <strong>aucune dépendance externe</strong>.
+</p>
+
+<h4>Migrations SQL jouées par PostgreSQL lui-même</h4>
+
+<p>
+Les fichiers du dossier <code>migrations/</code> sont montés dans
+<code>/docker-entrypoint-initdb.d</code> et exécutés par PostgreSQL au premier
+démarrage du conteneur. Aucun outil de migration supplémentaire n'est à
+installer ni à apprendre pour faire tourner le projet. La limite de ce choix
+est traitée en section 9.
+</p>
+
+<h3>2.3 Ce qui a été volontairement écarté</h3>
+
+<table>
+    <tr><th style="width:30%">Écarté</th><th>Pourquoi</th></tr>
+    <tr><td>Framework front (React, Vue)</td><td>Explicitement hors attendus du sujet</td></tr>
+    <tr><td>ORM</td><td>Masquerait le SQL qui porte le contrôle d'accès (section 2.2)</td></tr>
+    <tr><td>Conteneur d'injection de dépendances</td><td>L'assemblage manuel dans <code>main.go</code> tient en vingt lignes et se lit de haut en bas</td></tr>
+    <tr><td>Bibliothèque d'assertions de test (testify)</td><td>La bibliothèque standard suffit ; une dépendance de moins à justifier</td></tr>
+    <tr><td>Interfaces devant les repositories</td><td>Il n'existe qu'une implémentation. Les tests s'exécutent contre une vraie base, car c'est le comportement du SQL que l'on veut vérifier (section 7)</td></tr>
+    <tr><td>Jeton de rafraîchissement</td><td>Hors périmètre du sujet ; documenté comme limite en section 9</td></tr>
+</table>
+
+<div class="note">
+    <span class="note-title">Sur l'absence d'interfaces</span>
+    Introduire une interface <code>SpaceRepository</code> pour une unique
+    implémentation aurait ajouté une indirection sans bénéfice. L'abstraction
+    devient utile lorsqu'elle sert un besoin réel — plusieurs implémentations,
+    ou un test qui ne peut pas atteindre la dépendance réelle. Ce n'est le cas
+    ni de l'une ni de l'autre ici.
+</div>
+
+<!-- ===================================================================== -->
+<!-- 3. Architecture                                                        -->
+<!-- ===================================================================== -->
+
+<h2 class="page-break">3. Architecture globale</h2>
+
+<h3>3.1 Vue d'ensemble</h3>
+
+<p>
+La solution est composée de deux applications Go indépendantes, dans deux
+dépôts distincts, plus une base de données.
+</p>
+
+<figure>
+<svg width="500" height="235" viewBox="0 0 500 235" role="img"
+     aria-label="Schéma de l'architecture en trois couches">
+    <defs>
+        <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="3"
+                orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L9,3 z" fill="#2456c4"/>
+        </marker>
+    </defs>
+
+    <!-- Navigateur -->
+    <rect x="12" y="20" width="106" height="52" rx="4" fill="#f5f6f8" stroke="#8b97a8"/>
+    <text x="65" y="42" text-anchor="middle" font-family="Segoe UI, Arial" font-size="11" font-weight="600" fill="#1d2430">Navigateur</text>
+    <text x="65" y="58" text-anchor="middle" font-family="Segoe UI, Arial" font-size="8.5" fill="#5c6675">HTML + cookie</text>
+
+    <!-- Client -->
+    <rect x="152" y="12" width="122" height="68" rx="4" fill="#eaf0fd" stroke="#2456c4" stroke-width="1.4"/>
+    <text x="213" y="32" text-anchor="middle" font-family="Segoe UI, Arial" font-size="11" font-weight="600" fill="#1d2430">Client Go</text>
+    <text x="213" y="47" text-anchor="middle" font-family="Segoe UI, Arial" font-size="8.5" fill="#5c6675">html/template</text>
+    <text x="213" y="60" text-anchor="middle" font-family="Segoe UI, Arial" font-size="8.5" fill="#5c6675">port 3000</text>
+    <text x="213" y="73" text-anchor="middle" font-family="Consolas, monospace" font-size="7.5" fill="#5c6675">aucune dépendance</text>
+
+    <!-- Serveur -->
+    <rect x="308" y="12" width="122" height="68" rx="4" fill="#eaf0fd" stroke="#2456c4" stroke-width="1.4"/>
+    <text x="369" y="32" text-anchor="middle" font-family="Segoe UI, Arial" font-size="11" font-weight="600" fill="#1d2430">Serveur Go</text>
+    <text x="369" y="47" text-anchor="middle" font-family="Segoe UI, Arial" font-size="8.5" fill="#5c6675">API REST, Gin</text>
+    <text x="369" y="60" text-anchor="middle" font-family="Segoe UI, Arial" font-size="8.5" fill="#5c6675">port 8080</text>
+    <text x="369" y="73" text-anchor="middle" font-family="Consolas, monospace" font-size="7.5" fill="#5c6675">logique métier</text>
+
+    <!-- Base -->
+    <rect x="308" y="150" width="122" height="52" rx="4" fill="#f5f6f8" stroke="#8b97a8"/>
+    <text x="369" y="172" text-anchor="middle" font-family="Segoe UI, Arial" font-size="11" font-weight="600" fill="#1d2430">PostgreSQL 16</text>
+    <text x="369" y="188" text-anchor="middle" font-family="Segoe UI, Arial" font-size="8.5" fill="#5c6675">port 5432</text>
+
+    <!-- Flèches -->
+    <line x1="120" y1="46" x2="148" y2="46" stroke="#2456c4" stroke-width="1.3" marker-end="url(#arrow)"/>
+    <line x1="276" y1="46" x2="304" y2="46" stroke="#2456c4" stroke-width="1.3" marker-end="url(#arrow)"/>
+    <line x1="369" y1="84" x2="369" y2="146" stroke="#2456c4" stroke-width="1.3" marker-end="url(#arrow)"/>
+
+    <!-- Légendes des flux -->
+    <text x="134" y="40" text-anchor="middle" font-family="Consolas, monospace" font-size="7" fill="#5c6675">HTTP</text>
+    <text x="290" y="34" text-anchor="middle" font-family="Consolas, monospace" font-size="7" fill="#5c6675">JSON</text>
+    <text x="290" y="44" text-anchor="middle" font-family="Consolas, monospace" font-size="7" fill="#5c6675">+ Bearer</text>
+    <text x="376" y="118" text-anchor="start" font-family="Consolas, monospace" font-size="7" fill="#5c6675">SQL</text>
+
+    <!-- Chemin interdit : le client n'atteint jamais la base directement.
+         Le trait part du client, descend vers la base et est barré. -->
+    <path d="M213,84 L213,176 L302,176" fill="none" stroke="#cc8b2a"
+          stroke-width="1.1" stroke-dasharray="4 3"/>
+    <circle cx="213" cy="132" r="9" fill="#fff" stroke="#cc8b2a" stroke-width="1.1"/>
+    <line x1="208" y1="127" x2="218" y2="137" stroke="#cc8b2a" stroke-width="1.4"/>
+    <line x1="218" y1="127" x2="208" y2="137" stroke="#cc8b2a" stroke-width="1.4"/>
+    <text x="228" y="130" font-family="Segoe UI, Arial" font-size="8" fill="#cc8b2a">le client n'accède jamais</text>
+    <text x="228" y="141" font-family="Segoe UI, Arial" font-size="8" fill="#cc8b2a">directement à la base</text>
+</svg>
+<figcaption>Architecture en trois couches et frontière d'accès aux données</figcaption>
+</figure>
+
+<p>
+Trois propriétés découlent de ce découpage :
+</p>
+
+<ul>
+    <li>Le client <strong>n'accède jamais à la base de données</strong>. Il ne
+        connaît que l'adresse de l'API.</li>
+    <li>Le client <strong>ne connaît pas le secret de signature des jetons</strong>.
+        Il reçoit un jeton, le stocke, le rejoue — il ne le vérifie pas.</li>
+    <li>Le contrôle d'accès <strong>n'est pas réimplémenté côté client</strong>.
+        Celui-ci affiche ce que l'API lui retourne. La sécurité ne dépend donc
+        pas du client, qui pourrait être remplacé par une application mobile
+        sans qu'aucune garantie ne soit perdue.</li>
+</ul>
+
+<h3>3.2 Flux d'une requête authentifiée</h3>
+
+<p>
+Exemple : l'utilisateur ouvre la page d'un espace.
+</p>
+
+<pre><code>1. Navigateur    GET /spaces/3
+                 Cookie: session_token=&lt;jwt&gt;
+                       │
+2. Client Go     lit le cookie, appelle l'API
+                 GET /api/spaces/3/notes
+                 Authorization: Bearer &lt;jwt&gt;
+                       │
+3. Serveur Go    middleware : vérifie la signature du jeton,
+                 extrait l'identifiant utilisateur (claim « sub »),
+                 le dépose dans le contexte de la requête
+                       │
+4. Service       demande l'espace, puis ses notes
+                       │
+5. Repository    SELECT ... FROM spaces
+                 WHERE id = 3 AND user_id = &lt;id du contexte&gt;
+                       │
+6. PostgreSQL    0 ligne si l'espace appartient à un autre utilisateur
+                       │
+7. Serveur Go    0 ligne → ErrNotFound → HTTP 404
+                       │
+8. Client Go     404 de l'API → page « Cette page n'existe pas »</code></pre>
+
+<p>
+Le point clé est à l'étape 5 : l'identifiant de l'utilisateur provient du
+<strong>jeton vérifié</strong>, jamais de l'URL ni du corps de la requête. Un
+client ne peut donc pas désigner l'utilisateur pour lequel il prétend agir.
+</p>
+
+<h3>3.3 Répartition des responsabilités</h3>
+
+<table>
+    <tr><th style="width:26%">Responsabilité</th><th style="width:20%">Porté par</th><th>Commentaire</th></tr>
+    <tr><td>Logique métier</td><td>Serveur</td><td>Normalisation des données, règles d'accès</td></tr>
+    <tr><td>Accès aux données</td><td>Serveur</td><td>Seule couche à écrire du SQL</td></tr>
+    <tr><td>Authentification</td><td>Serveur</td><td>Hachage, signature et vérification des jetons</td></tr>
+    <tr><td>Validation des entrées</td><td>Serveur</td><td>Le client valide aussi, par confort ; seul le serveur fait foi</td></tr>
+    <tr><td>Contrôle d'accès</td><td>Serveur</td><td>Dans les clauses <code>WHERE</code> (section 6.2)</td></tr>
+    <tr><td>Rendu des pages</td><td>Client</td><td><code>html/template</code>, échappement contextuel</td></tr>
+    <tr><td>Session navigateur</td><td>Client</td><td>Cookie <code>HttpOnly</code> portant le jeton</td></tr>
+    <tr><td>Navigation et messages</td><td>Client</td><td>Redirections, confirmations, pages d'erreur</td></tr>
+</table>
+
+<!-- ===================================================================== -->
+<!-- 4. Organisation du code                                                -->
+<!-- ===================================================================== -->
+
+<h2 class="page-break">4. Organisation du code</h2>
+
+<h3>4.1 Dépôt serveur</h3>
+
+<pre><code>cmd/api/main.go        Point d'entrée : assemblage des briques, démarrage,
+                       arrêt propre. Aucune logique métier.
+internal/
+  apperrors/           Erreurs métier, indépendantes de HTTP
+  config/              Configuration lue dans l'environnement
+  database/            Ouverture et réglage du pool PostgreSQL
+  models/              Entités : User, Space, Note
+  repository/          Accès aux données, SQL écrit à la main
+  service/             Logique métier, orchestration
+  handlers/            Handlers HTTP, DTO, validation, format des erreurs
+  middleware/          Authentification par jeton
+migrations/            Schéma SQL et données de démonstration
+docs/                  Cette documentation</code></pre>
+
+<h3>4.2 Dépôt client</h3>
+
+<pre><code>cmd/web/main.go        Point d'entrée : assemblage, démarrage, arrêt propre
+internal/
+  api/                 Client HTTP typé : seul à connaître les routes de l'API
+  config/              Configuration lue dans l'environnement
+  handlers/            Handlers de pages, table des routes, session requise
+  render/              Compilation et exécution des gabarits
+  session/             Cookie portant le jeton JWT
+web/
+  templates/           layout, partials, pages
+  static/              Feuille de style
+  embed.go             Embarque templates/ et static/ dans le binaire</code></pre>
+
+<p>
+Le binaire du client est <strong>autonome</strong> : gabarits et CSS sont
+embarqués avec <code>go:embed</code>. Il fonctionne sans que le dossier
+<code>web/</code> soit déployé à côté de l'exécutable.
+</p>
+
+<h3>4.3 Règle de dépendance</h3>
+
+<p>
+Les deux applications suivent une dépendance à sens unique, sans retour :
+</p>
+
+<pre><code>Serveur :  handlers  →  service  →  repository  →  PostgreSQL
+Client  :  handlers  →  api      →  (HTTP)     →  Serveur</code></pre>
+
+<p>
+Chaque couche ne connaît que la suivante. Concrètement :
+</p>
+
+<ul>
+    <li>Le <code>repository</code> ne sait pas ce qu'est un code de statut HTTP.</li>
+    <li>Le <code>service</code> ne sait pas écrire de SQL.</li>
+    <li>Les <code>handlers</code> ne contiennent aucune règle métier : ils
+        décodent, appellent, sérialisent.</li>
+</ul>
+
+<p>
+Cette discipline a une conséquence pratique : le remplacement de PostgreSQL ou
+le passage à un client mobile n'affecte qu'une seule couche.
+</p>
+
+<!-- ===================================================================== -->
+<!-- 5. Modélisation                                                        -->
+<!-- ===================================================================== -->
+
+<h2>5. Modélisation des données</h2>
+
+<h3>5.1 Entités et relations</h3>
+
+<figure>
+<svg width="470" height="196" viewBox="0 0 470 196" role="img"
+     aria-label="Modèle entité-association : utilisateur, espace, note">
+    <!-- users -->
+    <rect x="10" y="14" width="128" height="104" rx="3" fill="#fff" stroke="#2456c4" stroke-width="1.3"/>
+    <rect x="10" y="14" width="128" height="20" rx="3" fill="#eaf0fd" stroke="#2456c4" stroke-width="1.3"/>
+    <text x="74" y="28" text-anchor="middle" font-family="Consolas, monospace" font-size="9.5" font-weight="700" fill="#1d2430">users</text>
+    <text x="18" y="48" font-family="Consolas, monospace" font-size="8" fill="#1d2430">id (PK)</text>
+    <text x="18" y="62" font-family="Consolas, monospace" font-size="8" fill="#1d2430">email (UNIQUE)</text>
+    <text x="18" y="76" font-family="Consolas, monospace" font-size="8" fill="#1d2430">password_hash</text>
+    <text x="18" y="90" font-family="Consolas, monospace" font-size="8" fill="#1d2430">name</text>
+    <text x="18" y="104" font-family="Consolas, monospace" font-size="8" fill="#5c6675">created_at</text>
+
+    <!-- spaces -->
+    <rect x="172" y="14" width="128" height="118" rx="3" fill="#fff" stroke="#2456c4" stroke-width="1.3"/>
+    <rect x="172" y="14" width="128" height="20" rx="3" fill="#eaf0fd" stroke="#2456c4" stroke-width="1.3"/>
+    <text x="236" y="28" text-anchor="middle" font-family="Consolas, monospace" font-size="9.5" font-weight="700" fill="#1d2430">spaces</text>
+    <text x="180" y="48" font-family="Consolas, monospace" font-size="8" fill="#1d2430">id (PK)</text>
+    <text x="180" y="62" font-family="Consolas, monospace" font-size="8" fill="#cc8b2a">user_id (FK)</text>
+    <text x="180" y="76" font-family="Consolas, monospace" font-size="8" fill="#1d2430">name</text>
+    <text x="180" y="90" font-family="Consolas, monospace" font-size="8" fill="#1d2430">description</text>
+    <text x="180" y="104" font-family="Consolas, monospace" font-size="8" fill="#5c6675">created_at</text>
+    <text x="180" y="118" font-family="Consolas, monospace" font-size="8" fill="#5c6675">updated_at</text>
+
+    <!-- notes -->
+    <rect x="334" y="14" width="128" height="132" rx="3" fill="#fff" stroke="#2456c4" stroke-width="1.3"/>
+    <rect x="334" y="14" width="128" height="20" rx="3" fill="#eaf0fd" stroke="#2456c4" stroke-width="1.3"/>
+    <text x="398" y="28" text-anchor="middle" font-family="Consolas, monospace" font-size="9.5" font-weight="700" fill="#1d2430">notes</text>
+    <text x="342" y="48" font-family="Consolas, monospace" font-size="8" fill="#1d2430">id (PK)</text>
+    <text x="342" y="62" font-family="Consolas, monospace" font-size="8" fill="#cc8b2a">space_id (FK)</text>
+    <text x="342" y="76" font-family="Consolas, monospace" font-size="8" fill="#1d2430">title</text>
+    <text x="342" y="90" font-family="Consolas, monospace" font-size="8" fill="#1d2430">content</text>
+    <text x="342" y="104" font-family="Consolas, monospace" font-size="8" fill="#1d2430">status (CHECK)</text>
+    <text x="342" y="118" font-family="Consolas, monospace" font-size="8" fill="#5c6675">created_at</text>
+    <text x="342" y="132" font-family="Consolas, monospace" font-size="8" fill="#5c6675">updated_at</text>
+
+    <!-- relations -->
+    <line x1="138" y1="62" x2="172" y2="62" stroke="#1d2430" stroke-width="1.1"/>
+    <text x="143" y="57" font-family="Segoe UI, Arial" font-size="8" fill="#1d2430">1</text>
+    <text x="162" y="57" font-family="Segoe UI, Arial" font-size="8" fill="#1d2430">n</text>
+
+    <line x1="300" y1="62" x2="334" y2="62" stroke="#1d2430" stroke-width="1.1"/>
+    <text x="305" y="57" font-family="Segoe UI, Arial" font-size="8" fill="#1d2430">1</text>
+    <text x="324" y="57" font-family="Segoe UI, Arial" font-size="8" fill="#1d2430">n</text>
+
+    <text x="236" y="160" text-anchor="middle" font-family="Segoe UI, Arial" font-size="8.5" fill="#cc8b2a">ON DELETE CASCADE sur les deux relations</text>
+    <text x="236" y="176" text-anchor="middle" font-family="Segoe UI, Arial" font-size="8.5" fill="#5c6675">notes.space_id est NOT NULL : une note ne peut pas exister sans espace</text>
+</svg>
+<figcaption>Modèle relationnel : un utilisateur possède des espaces, un espace contient des notes</figcaption>
+</figure>
+
+<h3>5.2 Schéma relationnel</h3>
+
+<p>
+Les identifiants sont des <code>BIGSERIAL</code>. Les horodatages sont des
+<code>TIMESTAMPTZ</code>, donc porteurs de leur fuseau : une date reste
+correcte quel que soit le fuseau du serveur qui la relit.
+</p>
+
+<table>
+    <tr><th style="width:26%">Contrainte</th><th style="width:26%">Porte sur</th><th>Ce qu'elle garantit</th></tr>
+    <tr><td><code>UNIQUE (email)</code></td><td><code>users</code></td><td>Un email identifie un seul compte. L'application stocke l'email en minuscules, rendant la contrainte insensible à la casse</td></tr>
+    <tr><td><code>UNIQUE (user_id, LOWER(name))</code></td><td><code>spaces</code></td><td>Un utilisateur ne peut pas avoir deux espaces de même nom, mais deux utilisateurs peuvent chacun avoir un espace « Devoirs »</td></tr>
+    <tr><td><code>NOT NULL</code> + FK</td><td><code>notes.space_id</code></td><td>Une note appartient obligatoirement à un espace existant</td></tr>
+    <tr><td><code>CHECK (status IN …)</code></td><td><code>notes.status</code></td><td>Seuls <code>todo</code>, <code>in_progress</code> et <code>done</code> sont acceptés</td></tr>
+    <tr><td><code>ON DELETE CASCADE</code></td><td>les deux FK</td><td>Supprimer un espace supprime ses notes ; supprimer un utilisateur supprime tout son contenu. Aucune ligne orpheline possible</td></tr>
+    <tr><td>Index sur <code>spaces.user_id</code> et <code>notes.space_id</code></td><td>—</td><td>Ces colonnes figurent dans toutes les clauses <code>WHERE</code> du contrôle d'accès</td></tr>
+</table>
+
+<h3>5.3 Invariants garantis par la base</h3>
+
+<p>
+Les règles ci-dessus sont posées <strong>au niveau du schéma</strong> et non
+uniquement dans le code Go. La distinction est importante : un invariant
+applicatif protège des erreurs d'usage, un invariant en base protège aussi des
+bugs applicatifs, des scripts de maintenance et des modifications manuelles.
+</p>
+
+<p>
+Chacune a été vérifiée par une tentative de violation directe en SQL :
+</p>
+
+<table>
+    <tr><th style="width:52%">Tentative</th><th>Résultat</th></tr>
+    <tr><td><code>INSERT … status = 'nawak'</code></td><td>Rejeté — <code>notes_status_valid</code></td></tr>
+    <tr><td><code>INSERT</code> espace « devoirs » alors que « Devoirs » existe</td><td>Rejeté — index unique insensible à la casse</td></tr>
+    <tr><td><code>INSERT</code> note sans <code>space_id</code></td><td>Rejeté — <code>NOT NULL</code></td></tr>
+    <tr><td><code>DELETE</code> d'un espace contenant 2 notes</td><td>Les 2 notes supprimées en cascade</td></tr>
+</table>
+
+<!-- ===================================================================== -->
+<!-- 6. Partis pris                                                         -->
+<!-- ===================================================================== -->
+
+<h2 class="page-break">6. Partis pris d'implémentation</h2>
+
+<h3>6.1 Authentification</h3>
+
+<h4>Stockage des mots de passe</h4>
+
+<p>
+Les mots de passe sont hachés avec <strong>bcrypt</strong> au coût par défaut.
+bcrypt est préféré à une fonction généraliste comme SHA-256 parce qu'il est
+volontairement lent et intègre un sel aléatoire : deux utilisateurs ayant
+choisi le même mot de passe ont des empreintes différentes, et les attaques par
+table précalculée deviennent impraticables. Le sel étant inclus dans la chaîne
+produite, il n'y a rien d'autre à stocker.
+</p>
+
+<p>
+La structure <code>User</code> porte son empreinte dans un champ marqué
+<code>json:"-"</code> : le hachage est <strong>structurellement insérialisable</strong>
+dans une réponse de l'API. Ce n'est pas une omission à maintenir, c'est une
+impossibilité.
+</p>
+
+<p>
+Les mots de passe sont en outre limités à 72 caractères à l'inscription. Cette
+limite n'est pas arbitraire : bcrypt ignore silencieusement les octets au-delà
+du 72<sup>e</sup>. Accepter une phrase secrète plus longue laisserait croire à
+l'utilisateur qu'il est protégé par l'intégralité de sa saisie.
+</p>
+
+<h4>Jetons JWT</h4>
+
+<p>
+Le serveur signe des jetons HS256 dont la durée de vie est de 24 heures.
+L'identifiant de l'utilisateur est placé dans le champ standard
+<code>sub</code>, prévu par la spécification pour désigner le porteur.
+</p>
+
+<p>
+La vérification impose explicitement l'algorithme attendu :
+</p>
+
+<pre><code>jwt.ParseWithClaims(token, &amp;jwt.RegisteredClaims{}, keyFunc,
+    jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))</code></pre>
+
+<div class="note">
+    <span class="note-title">Pourquoi cette ligne est essentielle</span>
+    Sans <code>WithValidMethods</code>, la bibliothèque fait confiance à
+    l'algorithme déclaré <em>dans le jeton lui-même</em>. Un attaquant peut
+    alors forger un jeton annonçant <code>alg: none</code>, sans signature, et
+    se faire passer pour n'importe quel utilisateur. C'est la faille la plus
+    répandue des implémentations JWT. Un test dédié
+    (<code>TestParseRejectsUnsignedToken</code>) verrouille ce comportement, et
+    la tentative a également été rejouée contre le serveur en fonctionnement.
+</div>
+
+<h4>Réponses aux échecs de connexion</h4>
+
+<p>
+Un email inconnu et un mot de passe erroné produisent <strong>exactement la
+même réponse</strong> : <code>401</code> et le message « email ou mot de passe
+incorrect ». Distinguer les deux cas permettrait de découvrir quelles adresses
+sont enregistrées, en soumettant simplement des emails au hasard.
+</p>
+
+<h3>6.2 Contrôle d'accès aux données</h3>
+
+<p>
+C'est le cœur du projet. Le parti pris tient en une phrase :
+<strong>le contrôle d'accès est porté par la signature des méthodes du
+repository, pas par des vérifications que l'appelant doit penser à écrire.</strong>
+</p>
+
+<p>
+Toutes les méthodes exigent l'identifiant de l'utilisateur et l'intègrent à
+leur requête :
+</p>
+
+<pre><code>func (r *SpaceRepository) GetByID(ctx context.Context,
+                                  userID, spaceID int64) (*models.Space, error)</code></pre>
+
+<p>
+Il n'existe <strong>aucune</strong> méthode permettant de lire un espace sans
+fournir un <code>userID</code>. Un développeur distrait ne peut donc pas
+contourner le filtre : le code ne compilerait pas.
+</p>
+
+<h4>Le cas des notes</h4>
+
+<p>
+Les notes sont plus délicates : elles ne portent pas de colonne
+<code>user_id</code>. Leur propriétaire est celui de l'espace qui les contient.
+Chaque requête effectue donc une jointure plutôt que de faire confiance à un
+contrôle réalisé en amont :
+</p>
+
+<pre><code>SELECT n.* FROM notes n
+JOIN spaces s ON s.id = n.space_id
+WHERE n.id = $1 AND s.user_id = $2</code></pre>
+
+<p>
+Pour la création, l'approche naïve serait de lire l'espace, vérifier son
+propriétaire, puis insérer. Cela demande deux requêtes et laisse une fenêtre
+pendant laquelle l'espace peut disparaître. Une seule requête suffit :
+</p>
+
+<pre><code>INSERT INTO notes (space_id, title, content, status)
+SELECT $1, $2, $3, $4
+WHERE EXISTS (SELECT 1 FROM spaces WHERE id = $1 AND user_id = $5)
+RETURNING id, space_id, title, content, status, created_at, updated_at</code></pre>
+
+<p>
+Si l'espace n'appartient pas à l'utilisateur, <strong>aucune ligne n'est
+insérée</strong>, <code>RETURNING</code> ne renvoie rien, et le repository
+traduit ce vide en <code>ErrNotFound</code>. L'opération est atomique.
+</p>
+
+<h4>404 plutôt que 403</h4>
+
+<p>
+Une ressource appartenant à autrui provoque un <code>404</code>, et non un
+<code>403</code>. Répondre <code>403</code> confirmerait que la ressource
+existe, permettant à un utilisateur de cartographier les données des autres en
+énumérant les identifiants. Les deux situations — « n'existe pas » et « ne vous
+appartient pas » — sont volontairement indistinguables de l'extérieur.
+</p>
+
+<h4>Vérification</h4>
+
+<p>
+Le cloisonnement a été éprouvé de deux manières. D'abord par des tests
+d'intégration contre une vraie base
+(<code>TestSpaceRepositoryIsolatesUsers</code>,
+<code>TestNoteRepositoryIsolatesUsers</code>), qui couvrent la lecture, la
+modification, la suppression, le listage et la création. Ensuite par des
+requêtes réelles contre le serveur puis contre le client, avec deux comptes :
+</p>
+
+<table>
+    <tr><th style="width:56%">Tentative de l'utilisateur B sur les données de A</th><th>Réponse</th></tr>
+    <tr><td>Lire un espace</td><td><code>404</code></td></tr>
+    <tr><td>Modifier un espace</td><td><code>404</code></td></tr>
+    <tr><td>Supprimer un espace</td><td><code>404</code></td></tr>
+    <tr><td>Lister les notes d'un espace</td><td><code>404</code></td></tr>
+    <tr><td>Créer une note dans un espace</td><td><code>404</code> — et <strong>0 ligne insérée</strong></td></tr>
+    <tr><td>Lire, modifier ou supprimer une note</td><td><code>404</code></td></tr>
+</table>
+
+<p>
+Après chaque série de tentatives, les données de A ont été relues et trouvées
+intactes : aucune opération n'avait abouti même partiellement.
+</p>
+
+<h3>6.3 Gestion des erreurs</h3>
+
+<h4>Côté serveur</h4>
+
+<p>
+Les couches basses retournent des <strong>erreurs métier typées</strong>
+(<code>ErrNotFound</code>, <code>ErrEmailAlreadyUsed</code>,
+<code>ErrInvalidCredentials</code>…) définies dans le paquet
+<code>apperrors</code>, qui ne connaît pas HTTP. Une <strong>unique
+fonction</strong>, <code>respondError</code>, les traduit en codes de statut.
+</p>
+
+<p>
+Cette centralisation a deux effets. Les réponses sont cohérentes sur toute
+l'API, et il n'existe qu'un seul endroit à relire pour savoir ce que renvoie le
+serveur dans chaque cas. Aucun <code>http.Error</code> n'est dispersé dans les
+handlers.
+</p>
+
+<table>
+    <tr><th style="width:14%">Statut</th><th>Cas</th></tr>
+    <tr><td><code>200</code></td><td>Succès</td></tr>
+    <tr><td><code>201</code></td><td>Ressource créée</td></tr>
+    <tr><td><code>204</code></td><td>Suppression effectuée, rien à retourner</td></tr>
+    <tr><td><code>400</code></td><td>Corps illisible, données invalides, identifiant d'URL non numérique</td></tr>
+    <tr><td><code>401</code></td><td>Jeton absent, invalide ou expiré ; identifiants incorrects</td></tr>
+    <tr><td><code>404</code></td><td>Ressource inexistante <em>ou</em> appartenant à un autre utilisateur</td></tr>
+    <tr><td><code>409</code></td><td>Email ou nom d'espace déjà utilisé</td></tr>
+    <tr><td><code>500</code></td><td>Erreur inattendue</td></tr>
+</table>
+
+<p>
+Les erreurs inattendues sont <strong>journalisées avec leur détail</strong>
+côté serveur, mais le client ne reçoit qu'un message générique. Renvoyer
+l'erreur brute exposerait la structure de la base ou des informations
+d'infrastructure.
+</p>
+
+<p>
+Les erreurs techniques de PostgreSQL sont traduites au plus près de leur
+source : le repository intercepte le code <code>23505</code> (violation
+d'unicité) et le convertit en <code>ErrEmailAlreadyUsed</code> ou
+<code>ErrSpaceNameAlreadyUsed</code>. Les couches supérieures ne voient donc
+jamais de code d'erreur PostgreSQL.
+</p>
+
+<h4>Côté client</h4>
+
+<p>
+Le client distingue trois familles de situations, et son comportement change
+dans chaque cas :
+</p>
+
+<table>
+    <tr><th style="width:30%">Situation</th><th>Comportement</th></tr>
+    <tr><td>Erreur de saisie (<code>400</code>, <code>409</code>)</td><td>Le formulaire est réaffiché, avec les valeurs déjà saisies et les messages sous les champs concernés. Le statut de l'API est conservé : un formulaire réaffiché après un refus n'est pas un succès</td></tr>
+    <tr><td>Jeton refusé (<code>401</code>)</td><td>La session est effacée et l'utilisateur est redirigé vers la connexion</td></tr>
+    <tr><td>API injoignable ou en défaut</td><td>Page d'erreur, mais <strong>la session est conservée</strong></td></tr>
+</table>
+
+<div class="note">
+    <span class="note-title">Pourquoi cette dernière distinction compte</span>
+    Déconnecter quelqu'un parce qu'un service distant est momentanément absent
+    l'obligerait à ressaisir ses identifiants sans raison : son jeton est
+    valide, c'est l'API qui est en cause. Le comportement a été vérifié en
+    arrêtant réellement le serveur : la page d'erreur s'affiche, le cookie
+    survit, et la navigation reprend sans reconnexion au redémarrage de l'API.
+</div>
+
+<h3>6.4 Validation des données</h3>
+
+<p>
+La validation est déclarée par des tags <code>binding</code> sur les structures
+de requête, au plus près des champs qu'elle contraint :
+</p>
+
+<pre><code>type registerRequest struct {
+    Email    string `json:"email"    binding:"required,email,max=255"`
+    Password string `json:"password" binding:"required,min=8,max=72"`
+    Name     string `json:"name"     binding:"required,min=2,max=100"`
+}</code></pre>
+
+<p>
+Les erreurs sont retournées <strong>champ par champ</strong>, sous une forme
+directement exploitable par un formulaire :
+</p>
+
+<pre><code>{
+  "error": "données invalides",
+  "fields": {
+    "email": "adresse email invalide",
+    "password": "ce champ doit contenir au moins 8 caractères"
+  }
+}</code></pre>
+
+<p>
+Une correspondance est enregistrée au démarrage
+(<code>ConfigureValidation</code>) pour que les clés de <code>fields</code>
+portent les noms <strong>JSON</strong> des champs et non leurs noms Go. Sans
+elle, le serveur répondrait « SpaceID » là où le client a envoyé
+« space_id », et le formulaire ne saurait pas à quel champ rattacher le
+message.
+</p>
+
+<p>
+Un dernier détail distingue les deux formulaires de note : l'état est
+facultatif à la création — une note nouvelle est « non faite » par défaut —
+mais <strong>obligatoire</strong> à la modification. Un <code>PUT</code>
+remplace l'intégralité de la ressource ; accepter un état absent le
+réinitialiserait silencieusement.
+</p>
+
+<h3>6.5 Persistance</h3>
+
+<p>
+L'accès se fait par <code>database/sql</code> avec le pilote pgx, en requêtes
+préparées paramétrées (<code>$1</code>, <code>$2</code>…). Aucune requête n'est
+construite par concaténation de chaînes : l'injection SQL est écartée par
+construction, non par filtrage des entrées.
+</p>
+
+<p>
+Le pool de connexions est explicitement borné (25 connexions ouvertes au
+maximum, 5 inactives, durée de vie de 5 minutes). Sans ces réglages, Go
+autorise un nombre illimité de connexions et peut saturer PostgreSQL sous
+charge.
+</p>
+
+<p>
+Deux détails d'implémentation méritent d'être signalés :
+</p>
+
+<ul>
+    <li><strong>Le nombre de notes par espace est calculé par jointure</strong>
+        dans la requête de listage, et non par une requête par espace. C'est ce
+        qui évite le problème dit « N+1 ».</li>
+    <li><strong><code>rows.Err()</code> est vérifié après chaque parcours.</strong>
+        Sans cette vérification, une erreur survenant en cours d'itération
+        passerait pour une liste simplement terminée, et le client recevrait
+        une liste tronquée présentée comme complète.</li>
+</ul>
+
+<p>
+Les suppressions inspectent <code>RowsAffected</code> : un <code>DELETE</code>
+qui ne correspond à aucune ligne ne produit pas d'erreur SQL. Sans ce contrôle,
+supprimer une ressource inexistante ou étrangère répondrait « succès ».
+</p>
+
+<h3>6.6 Gestion des états de note</h3>
+
+<p>
+L'état est un type nommé plutôt qu'une simple chaîne, ce qui rend les valeurs
+autorisées visibles dans le code et centralise leur validation :
+</p>
+
+<pre><code>type NoteStatus string
+
+const (
+    StatusTodo       NoteStatus = "todo"
+    StatusInProgress NoteStatus = "in_progress"
+    StatusDone       NoteStatus = "done"
+)</code></pre>
+
+<p>
+La même liste est contrainte à trois endroits, chacun couvrant ce que les
+autres ne peuvent pas : un <code>CHECK</code> en base (protège des écritures
+hors application), un tag <code>oneof</code> sur les requêtes (donne un message
+d'erreur exploitable), et la méthode <code>IsValid()</code> dans le service
+(protège si le service est appelé depuis un autre point d'entrée).
+</p>
+
+<p>
+Les libellés français sont portés par une méthode <code>Label()</code>
+appelée directement par les gabarits. La liste des états proposés dans les
+formulaires vient également du code Go : ajouter un état ne demandera pas de
+retoucher le HTML.
+</p>
+
+<h3>6.7 Contraintes propres au client HTML</h3>
+
+<h4>Les formulaires ne savent faire que GET et POST</h4>
+
+<p>
+Un navigateur ne peut pas émettre <code>PUT</code> ni <code>DELETE</code>
+depuis un formulaire. Le client expose donc des routes <code>POST</code>
+explicites, et c'est le client API qui les traduit :
+</p>
+
+<table>
+    <tr><th style="width:34%">Action</th><th style="width:33%">Route du client</th><th>Appel vers l'API</th></tr>
+    <tr><td>Modifier un espace</td><td><code>POST /spaces/{id}/edit</code></td><td><code>PUT /api/spaces/{id}</code></td></tr>
+    <tr><td>Supprimer un espace</td><td><code>POST /spaces/{id}/delete</code></td><td><code>DELETE /api/spaces/{id}</code></td></tr>
+    <tr><td>Modifier une note</td><td><code>POST /notes/{id}/edit</code></td><td><code>PUT /api/notes/{id}</code></td></tr>
+    <tr><td>Supprimer une note</td><td><code>POST /notes/{id}/delete</code></td><td><code>DELETE /api/notes/{id}</code></td></tr>
+</table>
+
+<p>
+L'API REST reste ainsi correcte et l'application fonctionne sans une ligne de
+JavaScript. L'alternative — un champ caché <code>_method</code> interprété par
+le serveur — aurait fait porter à l'API une contrainte propre au HTML.
+</p>
+
+<p>
+Les suppressions sont en <code>POST</code> et non en <code>GET</code> pour une
+autre raison : un lien <code>GET</code> peut être déclenché par le
+préchargement d'un navigateur ou par une image distante. Une suppression
+partirait alors sans clic de l'utilisateur. La déconnexion suit la même règle.
+</p>
+
+<h4>Session dans un cookie HttpOnly</h4>
+
+<p>
+Faute de JavaScript pour garder un jeton en mémoire, le client le stocke dans
+un cookie dont chaque attribut répond à une menace précise :
+</p>
+
+<table>
+    <tr><th style="width:30%">Attribut</th><th>Ce qu'il empêche</th></tr>
+    <tr><td><code>HttpOnly</code></td><td>La lecture du jeton depuis JavaScript, donc son exfiltration en cas de faille XSS</td></tr>
+    <tr><td><code>SameSite=Lax</code></td><td>L'envoi du cookie lors de requêtes venues d'un autre site, donc les attaques CSRF sur les formulaires de modification et de suppression</td></tr>
+    <tr><td><code>Expires</code> aligné sur le jeton</td><td>L'envoi de requêtes vouées à échouer : le navigateur oublie le cookie quand le jeton devient invalide</td></tr>
+</table>
+
+<h4>POST puis redirection</h4>
+
+<p>
+Toute action de modification répond par une redirection <code>303 See
+Other</code> et non par une page. L'utilisateur peut ainsi actualiser sans
+rejouer l'action, et le bouton « retour » ne propose pas de renvoyer le
+formulaire. Le <code>303</code> est préféré au <code>302</code> car il impose
+au navigateur de suivre la redirection en <code>GET</code>.
+</p>
+
+<p>
+Le message de confirmation doit alors survivre à la redirection : il est porté
+par un cookie de courte durée, lu et <strong>immédiatement effacé</strong> au
+rendu suivant. Un message de confirmation qui resterait affiché après un
+rechargement serait trompeur.
+</p>
+
+<h4>Échappement des contenus</h4>
+
+<p>
+<code>html/template</code> échappe selon le contexte, sans intervention. Une
+note intitulée <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> a été créée
+pour le vérifier :
+</p>
+
+<table>
+    <tr><th style="width:38%">Contexte de rendu</th><th>Résultat</th></tr>
+    <tr><td>Texte HTML</td><td><code>&amp;lt;script&amp;gt;</code></td></tr>
+    <tr><td>Attribut <code>value=""</code></td><td><code>&amp;lt;script&amp;gt;</code></td></tr>
+    <tr><td>Chaîne JavaScript (<code>onsubmit</code>)</td><td><code>&#92;u003cscript&#92;u003e</code></td></tr>
+</table>
+
+<p>
+Le même contenu est encodé de <strong>trois manières différentes</strong> selon
+l'endroit où il apparaît. Aucune balise n'est produite dans le document, et la
+charge reste du texte inerte.
+</p>
+
+<h4>Gabarits compilés au démarrage</h4>
+
+<p>
+Les gabarits sont compilés une seule fois au lancement : une erreur de syntaxe
+empêche le démarrage plutôt que d'apparaître au hasard d'une navigation. Le
+rendu passe en outre par un tampon mémoire avant d'être écrit dans la réponse.
+Sans ce détour, un gabarit qui échoue à mi-parcours aurait déjà envoyé au
+navigateur une page tronquée, impossible à remplacer par une page d'erreur
+puisque le statut serait déjà parti.
+</p>
+
+<!-- ===================================================================== -->
+<!-- 7. Tests                                                               -->
+<!-- ===================================================================== -->
+
+<h2 class="page-break">7. Stratégie de tests</h2>
+
+<p>
+Les tests ont été écrits là où ils apportent une garantie, et non pour
+atteindre un taux de couverture. Ils se répartissent en trois natures.
+</p>
+
+<h3>Tests unitaires — serveur</h3>
+
+<p>
+Ils couvrent ce qui est purement algorithmique : hachage et vérification des
+mots de passe, génération et validation des jetons, validité des états de note.
+Les cas d'attaque y figurent explicitement : jeton signé avec un autre secret,
+jeton expiré, signature altérée, jeton <code>alg=none</code>.
+</p>
+
+<h3>Tests d'intégration — serveur</h3>
+
+<p>
+Ils s'exécutent <strong>contre une véritable base PostgreSQL</strong>. C'est un
+choix assumé : ce que l'on veut vérifier ici est le comportement du SQL
+lui-même — filtrage par utilisateur dans les clauses <code>WHERE</code>,
+contraintes d'unicité, suppressions en cascade. Les simuler avec un faux
+repository ne prouverait rien de ce qui compte.
+</p>
+
+<p>
+Deux précautions les rendent utilisables au quotidien :
+</p>
+
+<ul>
+    <li>Sans la variable <code>TEST_DATABASE_URL</code>, ils sont
+        <strong>ignorés</strong> et non en échec : <code>go test ./...</code>
+        reste exécutable sans base disponible.</li>
+    <li>Chaque test crée ses propres utilisateurs jetables et les supprime à la
+        fin. La cascade du schéma emporte leurs espaces et leurs notes. Les
+        données de démonstration ne sont jamais modifiées, et la suite peut être
+        relancée indéfiniment — ce qui a été vérifié en comparant l'état de la
+        base avant et après.</li>
+</ul>
+
+<h3>Tests de bout en bout — client</h3>
+
+<p>
+Ils montent l'application complète — routeur, handlers et <strong>gabarits
+réels</strong> — devant une fausse API construite avec <code>httptest</code>.
+Ils vérifient donc ce qu'un navigateur recevrait vraiment : codes de statut,
+redirections, cookies et HTML produit. Ni serveur ni base de données ne sont
+nécessaires pour les lancer.
+</p>
+
+<p>
+Trois d'entre eux portent l'essentiel de la valeur :
+</p>
+
+<table>
+    <tr><th style="width:42%">Test</th><th>Ce qu'il verrouille</th></tr>
+    <tr><td><code>TestClientUsesExpectedMethodAndPath</code></td><td>Qu'un <code>POST /spaces/7/edit</code> venu du navigateur part bien en <code>PUT /api/spaces/7</code></td></tr>
+    <tr><td><code>TestAPIFailureDoesNotDestroySession</code></td><td>Qu'une API en défaut n'entraîne pas de déconnexion — le test jumeau <code>TestRejectedTokenClearsSessionAndRedirects</code> vérifiant qu'un jeton refusé, lui, déconnecte bien</td></tr>
+    <tr><td><code>TestNoteTitleIsEscaped</code></td><td>Que l'échappement est appliqué, et différemment selon le contexte</td></tr>
+</table>
+
+<h3>Vérification manuelle</h3>
+
+<p>
+Chaque fonctionnalité a en outre été éprouvée par des requêtes réelles contre
+le serveur puis le client en fonctionnement : cas nominaux, cas limites
+(identifiants non numériques ou négatifs, JSON malformé, champs hors bornes) et
+tentatives d'accès croisé entre deux comptes. Les résultats sont repris dans
+les sections correspondantes.
+</p>
+
+<!-- ===================================================================== -->
+<!-- 8. Méthode                                                             -->
+<!-- ===================================================================== -->
+
+<h2>8. Méthode de travail et versionnement</h2>
+
+<p>
+Le projet a été construit couche par couche, chaque étape sur sa propre branche
+mergée dans <code>main</code> avec un commit de fusion. L'historique conserve
+ainsi le découpage du travail et se lit comme la progression du projet.
+</p>
+
+<pre><code>Serveur                              Client
+────────────────────────────────     ────────────────────────────────
+chore: project structure             chore: project structure
+feat: database schema                feat: typed HTTP API client
+feat: authentication                 feat: template rendering
+feat: space management               feat: session and authentication
+feat: note management                feat: space pages
+chore: dependency upgrade            feat: note pages</code></pre>
+
+<p>
+Chaque commit a été vérifié avant d'être enregistré : <code>gofmt</code>,
+<code>go build</code>, <code>go vet</code> et la suite de tests. Chaque commit
+de l'historique compile donc de façon autonome.
+</p>
+
+<p>
+Un fichier <code>.gitattributes</code> normalise les fins de ligne en LF dans
+les deux dépôts. Le développement s'est fait sous Windows : sans cette règle,
+les fichiers auraient été versionnés avec des CRLF, ce qui empêche notamment
+<code>make</code> et les scripts shell de fonctionner sous Linux.
+</p>
+
+<p>
+Aucun secret n'est versionné. Les deux dépôts fournissent un
+<code>.env.example</code> et ignorent <code>.env</code>.
+</p>
+
+<h3>Un exemple de correction issue de cette méthode</h3>
+
+<p>
+La mise à jour des dépendances en fin de projet a fait apparaître un test en
+échec, <code>TestParseRejectsTamperedToken</code>. Le diagnostic mérite d'être
+rapporté, car c'est le test qui était faux et non la bibliothèque.
+</p>
+
+<p>
+Le test altérait le <strong>dernier</strong> caractère de la signature. Or une
+signature HS256 fait 32 octets, encodés en 43 caractères base64url qui en
+portent 258 bits : les deux derniers bits sont du remplissage. Quatre
+caractères finaux différents décodent donc vers les mêmes octets. L'ancienne
+version de la bibliothèque rejetait ce base64 non canonique — le test passait
+pour cette raison, et non pour celle qu'il annonçait. La nouvelle l'accepte,
+révélant le défaut.
+</p>
+
+<p>
+Le test altère désormais le <strong>premier</strong> caractère de la signature,
+qui porte des bits significatifs, et vérifie explicitement que le jeton modifié
+diffère de l'original. Le comportement de sécurité n'a jamais été en cause.
+</p>
+
+<!-- ===================================================================== -->
+<!-- 9. Limites                                                             -->
+<!-- ===================================================================== -->
+
+<h2 class="page-break">9. Limites, simplifications et compromis</h2>
+
+<p>
+Les points suivants sont des choix conscients, pas des oublis. Ils sont classés
+du plus au moins structurant.
+</p>
+
+<h3>9.1 Sécurité</h3>
+
+<div class="limit">
+    <strong>Pas de jeton de rafraîchissement.</strong> Le jeton d'accès vit
+    24 heures ; passé ce délai, l'utilisateur se reconnecte. Un couple
+    accès court / rafraîchissement long serait la solution complète, au prix
+    d'un stockage de jetons côté serveur. Hors périmètre du sujet.
+</div>
+
+<div class="limit">
+    <strong>Pas de révocation possible.</strong> Une API sans état ne peut pas
+    invalider un jeton déjà émis. La déconnexion efface le cookie du
+    navigateur, mais le jeton reste techniquement valide jusqu'à son
+    expiration. Une liste de révocation serait nécessaire — et ferait perdre
+    l'absence d'état.
+</div>
+
+<div class="limit">
+    <strong><code>Secure</code> absent du cookie de session.</strong> Le
+    développement se fait en HTTP. En production derrière HTTPS, cet attribut
+    est indispensable pour empêcher l'envoi du cookie en clair.
+</div>
+
+<div class="limit">
+    <strong>Pas de jeton anti-CSRF dédié.</strong> La protection repose sur
+    <code>SameSite=Lax</code>, qui couvre les navigateurs actuels. Un jeton par
+    formulaire serait la défense complète.
+</div>
+
+<div class="limit">
+    <strong>Pas de limitation du nombre de tentatives de connexion.</strong>
+    Rien n'empêche d'essayer des mots de passe en série. bcrypt ralentit
+    chaque tentative, ce qui atténue le problème sans le résoudre. Une
+    limitation par adresse IP ou par compte serait attendue en production.
+</div>
+
+<div class="limit">
+    <strong>Identifiants séquentiels.</strong> Les <code>BIGSERIAL</code>
+    permettent de deviner les identifiants voisins. L'impact est nul ici
+    puisque toute ressource étrangère répond <code>404</code>, mais des UUID
+    empêcheraient même la tentative.
+</div>
+
+<div class="limit">
+    <strong>Réponse de connexion à durée variable.</strong> Un email inconnu
+    renvoie sans exécuter bcrypt, un email connu l'exécute. L'écart de temps
+    permet théoriquement de deviner si une adresse est enregistrée. Un
+    calcul bcrypt factice dans le cas « inconnu » supprimerait cet écart.
+</div>
+
+<h3>9.2 Fonctionnalités</h3>
+
+<div class="limit">
+    <strong>Pas de pagination.</strong> Les listes d'espaces et de notes sont
+    retournées en entier. Acceptable à l'échelle d'un utilisateur, à revoir
+    au-delà de quelques centaines de notes par espace.
+</div>
+
+<div class="limit">
+    <strong>Une note ne peut pas changer d'espace.</strong>
+    <code>space_id</code> n'est pas modifiable. Le sujet ne le demande pas, et
+    l'autoriser impliquerait de vérifier l'appartenance de l'espace de
+    destination.
+</div>
+
+<div class="limit">
+    <strong>Pas de recherche ni de filtrage par état.</strong> Les notes sont
+    triées de la plus récente à la plus ancienne, sans autre option.
+</div>
+
+<div class="limit">
+    <strong>Aucun partage entre utilisateurs.</strong> Le modèle associe un
+    espace à exactement un utilisateur, conformément à l'énoncé. C'est ce qui
+    rend le contrôle d'accès aussi simple à garantir.
+</div>
+
+<h3>9.3 Exploitation</h3>
+
+<div class="limit">
+    <strong>Migrations jouées au premier démarrage du conteneur.</strong> Les
+    fichiers de <code>migrations/</code> ne sont exécutés qu'à la création du
+    volume PostgreSQL. Modifier le schéma impose de recréer la base
+    (<code>make db-reset</code>). Un outil de migration versionnée serait
+    nécessaire dès qu'il faut faire évoluer un schéma contenant des données
+    réelles.
+</div>
+
+<div class="limit">
+    <strong>Le serveur n'est pas conteneurisé.</strong> Seule la base l'est.
+    C'est un choix de confort en développement — recompiler est instantané —
+    mais un <code>Dockerfile</code> serait attendu pour un déploiement.
+</div>
+
+<div class="limit">
+    <strong>Journalisation textuelle.</strong> Le paquet <code>log</code>
+    standard est utilisé. Des journaux structurés (<code>log/slog</code>) avec
+    un identifiant de corrélation par requête seraient préférables pour
+    exploiter la production.
+</div>
+
+<div class="limit">
+    <strong>Pas d'intégration continue.</strong> Les vérifications
+    (<code>gofmt</code>, <code>vet</code>, tests) ont été lancées à la main
+    avant chaque commit. Un workflow GitHub Actions les rendrait
+    systématiques.
+</div>
+
+<div class="limit">
+    <strong>Le profil est relu à chaque requête du client.</strong> Chaque page
+    déclenche un appel à <code>/api/me</code>. C'est un aller-retour
+    supplémentaire, assumé au profit de la simplicité : le jeton est ainsi
+    toujours vérifié et le nom affiché toujours à jour.
+</div>
+
+<!-- ===================================================================== -->
+<!-- 10. Mise en route                                                      -->
+<!-- ===================================================================== -->
+
+<h2>10. Mise en route</h2>
+
+<p>
+Prérequis : <strong>Go 1.25</strong> ou supérieur, <strong>Docker</strong> et
+Docker Compose.
+</p>
+
+<pre><code># 1. Serveur
+git clone https://github.com/KxroTM/test-technique-ynov.git
+cd test-technique-ynov
+cp .env.example .env
+docker compose up -d        # PostgreSQL + schéma + données de démonstration
+go run ./cmd/api            # API sur http://localhost:8080
+
+# 2. Client, dans un autre terminal
+git clone https://github.com/KxroTM/test-technique-ynov-client.git
+cd test-technique-ynov-client
+cp .env.example .env
+go run ./cmd/web            # Application sur http://localhost:3000</code></pre>
+
+<p>
+Les valeurs par défaut des deux <code>.env.example</code> sont fonctionnelles
+en local : aucune modification n'est nécessaire.
+</p>
+
+<h3>Comptes de démonstration</h3>
+
+<table>
+    <tr><th style="width:30%">Email</th><th style="width:22%">Mot de passe</th><th>Contenu</th></tr>
+    <tr><td><code>alice@example.com</code></td><td><code>password123</code></td><td>2 espaces (« Devoirs », « Jobs »), 3 notes</td></tr>
+    <tr><td><code>bob@example.com</code></td><td><code>password123</code></td><td>1 espace (« Personnel »), 1 note</td></tr>
+</table>
+
+<p>
+Le second compte n'est pas là pour faire nombre. Connectez-vous en tant
+qu'Alice, relevez l'identifiant d'un de ses espaces, puis connectez-vous en
+tant que Bob et saisissez l'URL de cet espace : la page « introuvable »
+s'affiche. C'est la démonstration la plus directe du cloisonnement décrit en
+section 6.2.
+</p>
+
+<h3>Lancer les tests</h3>
+
+<pre><code># Serveur — tests unitaires
+go test ./...
+
+# Serveur — tests d'intégration (base démarrée requise)
+TEST_DATABASE_URL="postgres://notes_user:notes_password@localhost:5432/notes_db?sslmode=disable" \
+  go test ./internal/repository -v
+
+# Client — aucune dépendance requise
+go test ./...</code></pre>
+
+<p>
+Un <code>Makefile</code> regroupe ces commandes dans les deux dépôts
+(<code>make help</code> en donne la liste).
+</p>
+
+</body>
+</html>

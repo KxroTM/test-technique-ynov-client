@@ -154,6 +154,15 @@ Trois tests méritent d'être signalés :
   selon le contexte : en entités HTML dans le corps de la page, en séquences
   `\u` dans l'attribut JavaScript.
 
+## Documentation technique
+
+Le document `docs/documentation-technique.pdf` couvre l'ensemble de la solution
+— serveur et client : choix techniques, architecture, modélisation, partis pris
+d'implémentation et limites. Il est identique dans les deux dépôts.
+
+Sa source HTML (`docs/documentation-technique.html`) est versionnée à côté du
+PDF, afin de rester comparable d'une version à l'autre.
+
 ## Structure du projet
 
 ```
