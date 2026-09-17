@@ -1,0 +1,9 @@
+# Secrets et configuration locale
+.env
+
+# Binaires compilés
+bin/
+*.exe
+
+# Couverture de tests
+coverage.out

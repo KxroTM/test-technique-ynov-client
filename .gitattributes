@@ -1,0 +1,11 @@
+# Normalise les fins de ligne en LF dans le dépôt.
+# Sans cette règle, un développement sous Windows versionne des CRLF, ce qui
+# empêche notamment make et les scripts shell de fonctionner sous Linux.
+* text=auto eol=lf
+
+Makefile        text eol=lf
+*.sh            text eol=lf
+*.go            text eol=lf
+*.html          text eol=lf
+*.css           text eol=lf
+*.yml           text eol=lf
