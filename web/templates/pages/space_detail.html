@@ -1,0 +1,33 @@
+{{define "content"}}
+<nav class="breadcrumb">
+    <a href="/spaces">Mes espaces</a>
+    <span aria-hidden="true">/</span>
+    <span>{{.Space.Name}}</span>
+</nav>
+
+<div class="page-header">
+    <div>
+        <h1>{{.Space.Name}}</h1>
+        {{if .Space.Description}}
+        <p class="muted">{{.Space.Description}}</p>
+        {{end}}
+    </div>
+    <a class="button button-primary" href="/spaces/{{.Space.ID}}/notes/new">Nouvelle note</a>
+</div>
+
+{{if .Notes}}
+<div class="note-list">
+    {{range .Notes}}
+    {{template "noteCard" .}}
+    {{end}}
+</div>
+{{else}}
+<div class="card empty-state">
+    <h2>Cet espace est vide</h2>
+    <p class="muted">
+        Ajoutez une première note pour commencer à remplir « {{.Space.Name}} ».
+    </p>
+    <a class="button button-primary" href="/spaces/{{.Space.ID}}/notes/new">Ajouter une note</a>
+</div>
+{{end}}
+{{end}}

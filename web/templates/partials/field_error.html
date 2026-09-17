@@ -1,0 +1,12 @@
+{{/*
+  Affiche le message d'erreur d'un champ de formulaire, s'il y en a un.
+
+  Le partial reçoit directement la chaîne du message, extraite dans le gabarit
+  appelant :
+
+      {{template "fieldError" (index .FieldErrors "email")}}
+
+  Il ne rend rien lorsque la chaîne est vide, ce qui évite d'écrire une
+  condition autour de chaque appel.
+*/}}
+{{define "fieldError"}}{{if .}}<span class="field-error">{{.}}</span>{{end}}{{end}}

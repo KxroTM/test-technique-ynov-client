@@ -1,0 +1,55 @@
+{{define "content"}}
+<div class="page-header">
+    <div>
+        <h1>Mes espaces</h1>
+        <p class="muted">Organisez vos notes par thème.</p>
+    </div>
+    <a class="button button-primary" href="/spaces/new">Nouvel espace</a>
+</div>
+
+{{if .Spaces}}
+<div class="space-grid">
+    {{range .Spaces}}
+    <article class="card space-card">
+        <h2 class="space-name">
+            <a href="/spaces/{{.ID}}">{{.Name}}</a>
+        </h2>
+
+        {{if .Description}}
+        <p class="space-description">{{truncate .Description 140}}</p>
+        {{else}}
+        <p class="space-description muted">Aucune description.</p>
+        {{end}}
+
+        <footer class="space-card-footer">
+            {{/* Le pluriel est géré ici plutôt qu'en Go : c'est de la mise
+                 en forme, et html/template sait comparer deux valeurs. */}}
+            <span class="note-count">
+                {{if eq .NoteCount 1}}1 note{{else}}{{.NoteCount}} notes{{end}}
+            </span>
+
+            <div class="space-actions">
+                <a class="button button-small" href="/spaces/{{.ID}}">Ouvrir</a>
+                <a class="button button-small" href="/spaces/{{.ID}}/edit">Modifier</a>
+
+                <form method="post" action="/spaces/{{.ID}}/delete"
+                      onsubmit="return confirm('Supprimer l\'espace « {{.Name}} » et ses {{.NoteCount}} note(s) ? Cette action est irréversible.');">
+                    <button type="submit" class="button button-small button-danger">Supprimer</button>
+                </form>
+            </div>
+        </footer>
+    </article>
+    {{end}}
+</div>
+{{else}}
+<div class="card empty-state">
+    <h2>Aucun espace pour le moment</h2>
+    <p class="muted">
+        Un espace regroupe des notes autour d'un même thème : « Devoirs »,
+        « Jobs », « Personnel »… Vous devez en créer un avant de pouvoir
+        ajouter des notes.
+    </p>
+    <a class="button button-primary" href="/spaces/new">Créer mon premier espace</a>
+</div>
+{{end}}
+{{end}}

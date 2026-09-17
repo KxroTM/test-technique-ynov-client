@@ -1,0 +1,19 @@
+{{define "content"}}
+{{/*
+  Page d'erreur générique, utilisée pour les 404 et les 500.
+
+  Le message affiché vient du handler et reste volontairement sobre : il ne
+  contient jamais le détail technique de l'erreur, qui est journalisé côté
+  serveur. Afficher une trace à l'utilisateur ne l'aide pas et renseigne un
+  éventuel attaquant sur l'infrastructure.
+*/}}
+<section class="card error-page">
+    <p class="error-code">{{.StatusCode}}</p>
+    <h1>{{.Heading}}</h1>
+    <p class="muted">{{.Detail}}</p>
+
+    <div class="form-buttons">
+        <a class="button button-primary" href="/spaces">Retour à mes espaces</a>
+    </div>
+</section>
+{{end}}
