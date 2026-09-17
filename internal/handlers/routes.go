@@ -26,6 +26,16 @@ func (h *Handler) Routes(staticHandler http.Handler) *http.ServeMux {
 	mux.HandleFunc("POST /register", h.Register)
 	mux.HandleFunc("POST /logout", h.Logout)
 
+	// Espaces. Chaque page est enveloppée par requireAuth : la protection
+	// est visible ici, route par route, et un oubli se repère à la lecture.
+	mux.HandleFunc("GET /spaces", h.requireAuth(h.ListSpaces))
+	mux.HandleFunc("GET /spaces/new", h.requireAuth(h.NewSpace))
+	mux.HandleFunc("POST /spaces/new", h.requireAuth(h.CreateSpace))
+	mux.HandleFunc("GET /spaces/{spaceID}", h.requireAuth(h.ShowSpace))
+	mux.HandleFunc("GET /spaces/{spaceID}/edit", h.requireAuth(h.EditSpace))
+	mux.HandleFunc("POST /spaces/{spaceID}/edit", h.requireAuth(h.UpdateSpace))
+	mux.HandleFunc("POST /spaces/{spaceID}/delete", h.requireAuth(h.DeleteSpace))
+
 	// Route attrape-tout : toute adresse non reconnue ci-dessus atterrit ici.
 	// Sans elle, le routeur répondrait le « 404 page not found » brut de la
 	// bibliothèque standard, sans mise en page ni navigation pour revenir.
