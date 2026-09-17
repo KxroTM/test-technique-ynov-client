@@ -1,0 +1,33 @@
+{{/*
+  Carte d'une note dans la liste d'un espace.
+
+  Les actions de modification et de suppression sont des formulaires POST et
+  non des liens : un lien est une requête GET, que le navigateur peut
+  préparer à l'avance. Une suppression déclenchée par un GET peut donc partir
+  sans que l'utilisateur ait cliqué.
+*/}}
+{{define "noteCard"}}
+<article class="note-card status-{{.Status}}">
+    <header class="note-card-header">
+        <h3 class="note-title">{{.Title}}</h3>
+        <span class="badge badge-{{.Status}}">{{.Status.Label}}</span>
+    </header>
+
+    {{with .Content}}
+    <p class="note-content">{{truncate . 220}}</p>
+    {{end}}
+
+    <footer class="note-card-footer">
+        <span class="note-date">Modifiée le {{formatDate .UpdatedAt}}</span>
+
+        <div class="note-actions">
+            <a class="button button-small" href="/notes/{{.ID}}/edit">Modifier</a>
+
+            <form method="post" action="/notes/{{.ID}}/delete"
+                  onsubmit="return confirm('Supprimer définitivement la note « {{.Title}} » ?');">
+                <button type="submit" class="button button-small button-danger">Supprimer</button>
+            </form>
+        </div>
+    </footer>
+</article>
+{{end}}

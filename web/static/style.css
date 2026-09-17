@@ -1,0 +1,537 @@
+/*
+ * Feuille de style unique de l'application.
+ *
+ * Écrite à la main, sans framework : le sujet porte sur Go et les gabarits
+ * HTML, et une dépendance front aurait ajouté du bruit sans rien apporter.
+ *
+ * Organisation : variables, base, mise en page, composants, utilitaires.
+ */
+
+/* ------------------------------------------------------------------------- */
+/* Variables                                                                  */
+/* ------------------------------------------------------------------------- */
+
+:root {
+    --color-text: #1f2430;
+    --color-text-muted: #667085;
+    --color-background: #f6f7f9;
+    --color-surface: #ffffff;
+    --color-border: #e3e6ea;
+
+    --color-primary: #2f6df0;
+    --color-primary-dark: #2456c4;
+    --color-danger: #d1443c;
+    --color-danger-dark: #b0332c;
+
+    --color-todo: #8a94a6;
+    --color-progress: #d18b1f;
+    --color-done: #2f9e5f;
+
+    --radius: 8px;
+    --radius-small: 5px;
+    --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.1);
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Base                                                                       */
+/* ------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    /* La pile de polices système évite de télécharger une police externe :
+       le rendu est immédiat et aucune requête ne part vers un tiers. */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--color-text);
+    background: var(--color-background);
+}
+
+h1, h2, h3 {
+    margin: 0 0 var(--space-2);
+    line-height: 1.25;
+}
+
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.2rem; }
+h3 { font-size: 1.02rem; }
+
+p { margin: 0 0 var(--space-3); }
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+a:hover { text-decoration: underline; }
+
+code {
+    padding: 1px 5px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size: 0.86em;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+}
+
+/* Rend visible la cible du clavier : sans cette règle, la navigation à la
+   tabulation devient impossible à suivre. */
+:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Mise en page                                                               */
+/* ------------------------------------------------------------------------- */
+
+.container {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+}
+
+.site-header {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 58px;
+}
+
+.brand {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.brand:hover { text-decoration: none; }
+
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.user-name {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+main.container {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-6);
+}
+
+.site-footer {
+    padding: var(--space-4) 0;
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    border-top: 1px solid var(--color-border);
+}
+
+.site-footer p { margin: 0; }
+
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+}
+
+.page-header p { margin: 0; }
+
+.breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    font-size: 0.87rem;
+    color: var(--color-text-muted);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Cartes                                                                     */
+/* ------------------------------------------------------------------------- */
+
+.card {
+    padding: var(--space-5);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+/* La grille s'adapte à la largeur disponible sans requête média :
+   auto-fill place autant de colonnes de 260px minimum qu'il y a de place. */
+.space-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--space-4);
+}
+
+.space-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.space-name { margin: 0; }
+
+.space-description {
+    flex: 1;
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--color-text-muted);
+}
+
+.space-card-footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+}
+
+.note-count {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+}
+
+.space-actions,
+.note-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Notes                                                                      */
+/* ------------------------------------------------------------------------- */
+
+.note-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.note-card {
+    padding: var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    /* Le liseré coloré à gauche donne l'état de la note d'un coup d'œil,
+       sans avoir à lire le badge. */
+    border-left: 3px solid var(--color-todo);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.note-card.status-in_progress { border-left-color: var(--color-progress); }
+.note-card.status-done { border-left-color: var(--color-done); }
+
+.note-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-2);
+}
+
+.note-title { margin: 0; }
+
+.note-content {
+    margin: 0 0 var(--space-3);
+    font-size: 0.92rem;
+    color: var(--color-text-muted);
+    /* Préserve les retours à la ligne saisis par l'utilisateur, sans
+       empêcher le retour automatique des lignes trop longues. */
+    white-space: pre-wrap;
+}
+
+.note-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+}
+
+.note-date {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+}
+
+.badge {
+    padding: 2px 9px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    background: var(--color-todo);
+    border-radius: 999px;
+}
+
+.badge-in_progress { background: var(--color-progress); }
+.badge-done { background: var(--color-done); }
+
+/* ------------------------------------------------------------------------- */
+/* Boutons                                                                    */
+/* ------------------------------------------------------------------------- */
+
+.button {
+    display: inline-block;
+    padding: 8px 15px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text);
+    text-align: center;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+}
+
+.button:hover {
+    text-decoration: none;
+    border-color: var(--color-text-muted);
+}
+
+.button-primary {
+    color: #fff;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.button-primary:hover {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+}
+
+.button-danger {
+    color: var(--color-danger);
+    border-color: var(--color-border);
+}
+
+.button-danger:hover {
+    color: #fff;
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+}
+
+.button-ghost {
+    color: var(--color-text-muted);
+    background: transparent;
+}
+
+.button-small {
+    padding: 5px 11px;
+    font-size: 0.83rem;
+}
+
+.button-block {
+    display: block;
+    width: 100%;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Formulaires                                                                */
+/* ------------------------------------------------------------------------- */
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.form-card { max-width: 620px; }
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.form-group label {
+    font-size: 0.89rem;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+    padding: 9px 11px;
+    font-family: inherit;
+    font-size: 0.94rem;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(47, 109, 240, 0.14);
+}
+
+textarea {
+    resize: vertical;
+    /* Conserve la police système plutôt que la police monospace que les
+       navigateurs appliquent par défaut aux zones de texte. */
+    font-family: inherit;
+}
+
+.form-buttons {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.field-hint,
+.field-error {
+    font-size: 0.82rem;
+}
+
+.field-hint { color: var(--color-text-muted); }
+
+.field-error {
+    font-weight: 500;
+    color: var(--color-danger);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Alertes                                                                    */
+/* ------------------------------------------------------------------------- */
+
+.alert {
+    padding: var(--space-3) var(--space-4);
+    margin-bottom: var(--space-4);
+    font-size: 0.91rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-small);
+}
+
+.alert-success {
+    color: #1c6b43;
+    background: #e7f6ed;
+    border-color: #bfe6cf;
+}
+
+.alert-error {
+    color: #8e2b25;
+    background: #fdecea;
+    border-color: #f5c6c2;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Pages particulières                                                        */
+/* ------------------------------------------------------------------------- */
+
+.auth-layout {
+    display: flex;
+    justify-content: center;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+}
+
+.auth-switch {
+    margin: var(--space-4) 0 0;
+    font-size: 0.89rem;
+    text-align: center;
+}
+
+.demo-box {
+    padding: var(--space-3) var(--space-4);
+    margin-top: var(--space-4);
+    font-size: 0.86rem;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+}
+
+.demo-title {
+    margin: 0 0 var(--space-2);
+    font-weight: 600;
+}
+
+.demo-box ul {
+    padding-left: var(--space-5);
+    margin: 0 0 var(--space-2);
+}
+
+.demo-box p:last-child { margin-bottom: 0; }
+
+.empty-state {
+    max-width: 560px;
+    text-align: center;
+}
+
+.empty-state .button { margin-top: var(--space-2); }
+
+.error-page {
+    max-width: 520px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.error-code {
+    margin: 0;
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+}
+
+.error-page .form-buttons { justify-content: center; }
+
+/* ------------------------------------------------------------------------- */
+/* Utilitaires                                                                */
+/* ------------------------------------------------------------------------- */
+
+.muted { color: var(--color-text-muted); }
+
+/* ------------------------------------------------------------------------- */
+/* Petits écrans                                                              */
+/* ------------------------------------------------------------------------- */
+
+@media (max-width: 560px) {
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .note-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

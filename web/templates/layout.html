@@ -1,0 +1,46 @@
+{{define "layout"}}<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{.Title}} — Mes notes</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" href="/">Mes notes</a>
+
+            {{if .User}}
+            <nav class="header-nav">
+                <span class="user-name">{{.User.Name}}</span>
+                <form method="post" action="/logout">
+                    <button type="submit" class="button button-ghost">Déconnexion</button>
+                </form>
+            </nav>
+            {{end}}
+        </div>
+    </header>
+
+    <main class="container">
+        {{/* Le message flash est affiché une seule fois, puis oublié :
+             il est porté par un cookie que le handler efface au rendu. */}}
+        {{with .Flash}}
+        <p class="alert alert-success" role="status">{{.}}</p>
+        {{end}}
+
+        {{with .ErrorMessage}}
+        <p class="alert alert-error" role="alert">{{.}}</p>
+        {{end}}
+
+        {{template "content" .}}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>Test technique — application de gestion de notes par espaces</p>
+        </div>
+    </footer>
+</body>
+</html>
+{{end}}

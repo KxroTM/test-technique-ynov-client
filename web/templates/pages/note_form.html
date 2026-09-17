@@ -1,0 +1,55 @@
+{{define "content"}}
+{{/*
+  Page unique pour la création et la modification d'une note, sur le même
+  principe que le formulaire d'espace.
+*/}}
+<nav class="breadcrumb">
+    <a href="/spaces">Mes espaces</a>
+    <span aria-hidden="true">/</span>
+    <a href="/spaces/{{.Space.ID}}">{{.Space.Name}}</a>
+    <span aria-hidden="true">/</span>
+    <span>{{.Title}}</span>
+</nav>
+
+<section class="card form-card">
+    <h1>{{.Title}}</h1>
+    <p class="muted">
+        Cette note appartient à l'espace « {{.Space.Name}} ».
+    </p>
+
+    <form method="post" action="{{.FormAction}}" class="form">
+        <div class="form-group">
+            <label for="title">Titre</label>
+            <input type="text" id="title" name="title" value="{{.Form.Title}}"
+                   maxlength="200" required autofocus>
+            {{template "fieldError" (index .FieldErrors "title")}}
+        </div>
+
+        <div class="form-group">
+            <label for="content">Contenu</label>
+            <textarea id="content" name="content" rows="8"
+                      maxlength="10000">{{.Form.Content}}</textarea>
+            {{template "fieldError" (index .FieldErrors "content")}}
+        </div>
+
+        <div class="form-group">
+            <label for="status">État</label>
+            {{/* Les états proviennent du code Go (api.AllStatuses) et ne sont
+                 pas écrits en dur ici : ajouter un état ne demandera pas de
+                 retoucher ce gabarit. */}}
+            <select id="status" name="status">
+                {{$current := .Form.Status}}
+                {{range .Statuses}}
+                <option value="{{.}}" {{if eq . $current}}selected{{end}}>{{.Label}}</option>
+                {{end}}
+            </select>
+            {{template "fieldError" (index .FieldErrors "status")}}
+        </div>
+
+        <div class="form-buttons">
+            <button type="submit" class="button button-primary">{{.SubmitLabel}}</button>
+            <a class="button button-ghost" href="{{.CancelURL}}">Annuler</a>
+        </div>
+    </form>
+</section>
+{{end}}

@@ -1,0 +1,46 @@
+{{define "content"}}
+<div class="auth-layout">
+    <section class="card auth-card">
+        <h1>Connexion</h1>
+        <p class="muted">Accédez à vos espaces et à vos notes.</p>
+
+        <form method="post" action="/login" class="form">
+            <div class="form-group">
+                <label for="email">Adresse email</label>
+                {{/* La valeur saisie est réaffichée après une erreur : sans
+                     cela, l'utilisateur devrait retaper son email à chaque
+                     tentative infructueuse. Le mot de passe, lui, n'est
+                     jamais réaffiché. */}}
+                <input type="email" id="email" name="email" value="{{.Form.Email}}"
+                       autocomplete="email" required autofocus>
+                {{template "fieldError" (index .FieldErrors "email")}}
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" name="password"
+                       autocomplete="current-password" required>
+                {{template "fieldError" (index .FieldErrors "password")}}
+            </div>
+
+            <button type="submit" class="button button-primary button-block">Se connecter</button>
+        </form>
+
+        <p class="auth-switch">
+            Pas encore de compte ? <a href="/register">Créer un compte</a>
+        </p>
+
+        <div class="demo-box">
+            <p class="demo-title">Comptes de démonstration</p>
+            <ul>
+                <li><code>alice@example.com</code> / <code>password123</code></li>
+                <li><code>bob@example.com</code> / <code>password123</code></li>
+            </ul>
+            <p class="muted">
+                Les deux comptes permettent de vérifier que les données de
+                l'un ne sont jamais visibles depuis l'autre.
+            </p>
+        </div>
+    </section>
+</div>
+{{end}}
