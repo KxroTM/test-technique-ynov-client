@@ -1,4 +1,4 @@
-// Commande web : point d'entrée du client.
+// Point d'entrée du client web.
 //
 // Le client est un serveur HTTP à part entière. Il ne contient aucune règle
 // métier et n'accède jamais à la base de données : il rend des pages HTML et

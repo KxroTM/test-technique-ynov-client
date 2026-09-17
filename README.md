@@ -68,7 +68,7 @@ modification n'est nécessaire si le serveur écoute sur le port `8080`.
 ### 3. Lancer le client
 
 ```bash
-go run ./cmd/web
+go run .
 ```
 
 L'application est accessible sur **http://localhost:3000**.
@@ -117,7 +117,7 @@ appartenant à l'autre compte.
 | `make vet`     | Analyse statique |
 
 Si `make` n'est pas disponible, les commandes `go` équivalentes s'utilisent
-directement (`go run ./cmd/web`, `go test ./...`).
+directement (`go run .`, `go test ./...`).
 
 ## Tests
 
@@ -166,7 +166,7 @@ PDF, afin de rester comparable d'une version à l'autre.
 ## Structure du projet
 
 ```
-cmd/web/            Point d'entrée : assemblage et démarrage
+main.go             Point d'entrée : assemblage et démarrage
 internal/
   api/              Client HTTP typé vers le serveur (le seul à connaître l'API)
   config/           Configuration depuis l'environnement
