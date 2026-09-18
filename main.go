@@ -1,8 +1,3 @@
-// Point d'entrée du client web.
-//
-// Le client est un serveur HTTP à part entière. Il ne contient aucune règle
-// métier et n'accède jamais à la base de données : il rend des pages HTML et
-// dialogue avec l'API du serveur.
 package main
 
 import (
@@ -23,15 +18,13 @@ import (
 )
 
 func main() {
-	// 1. Configuration.
+	// 1. Configuration
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("configuration invalide : %v", err)
 	}
 
-	// 2. Gabarits. Ils sont compilés maintenant : une erreur de syntaxe
-	// empêche le démarrage plutôt que d'apparaître au hasard d'une
-	// navigation.
+	// 2. Gabarits
 	renderer, err := render.New(web.Files)
 	if err != nil {
 		log.Fatalf("compilation des gabarits : %v", err)
@@ -42,11 +35,11 @@ func main() {
 		log.Fatalf("accès aux fichiers statiques : %v", err)
 	}
 
-	// 3. Client API et handlers.
+	// 3. Client API et handlers
 	apiClient := api.NewClient(cfg.APIBaseURL)
-	handler := handlers.New(apiClient, renderer)
+	handler := handlers.New(apiClient, renderer, cfg.GoogleClientID)
 
-	// 4. Démarrage du serveur.
+	// 4. Démarrage du serveur
 	server := &http.Server{
 		Addr:              ":" + cfg.Port,
 		Handler:           handler.Routes(staticHandler),
@@ -56,12 +49,15 @@ func main() {
 	go func() {
 		log.Printf("client web démarré sur http://localhost:%s", cfg.Port)
 		log.Printf("API utilisée : %s", cfg.APIBaseURL)
+		if cfg.GoogleEnabled() {
+			log.Println("connexion Google activée")
+		}
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("arrêt inattendu du serveur : %v", err)
 		}
 	}()
 
-	// 5. Arrêt propre.
+	// 5. Arrêt propre
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit

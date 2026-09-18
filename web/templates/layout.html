@@ -1,46 +1,62 @@
 {{define "layout"}}<!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="no-js">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{.Title}} — Mes notes</title>
+    <meta name="color-scheme" content="light dark">
+    <title>{{.Title}} · Espaces</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230a84ff'/%3E%3Crect x='7.5' y='13' width='4' height='11' rx='2' fill='white' opacity='.55'/%3E%3Crect x='14' y='8' width='4' height='16' rx='2' fill='white'/%3E%3Crect x='20.5' y='16' width='4' height='8' rx='2' fill='white' opacity='.4'/%3E%3C/svg%3E">
+    <script>document.documentElement.classList.remove('no-js')</script>
 </head>
 <body>
     <header class="site-header">
         <div class="container header-inner">
-            <a class="brand" href="/">Mes notes</a>
+            <a class="brand" href="/spaces">
+                {{template "logoMark"}}
+                <span class="brand-word">Espaces</span>
+            </a>
 
             {{if .User}}
             <nav class="header-nav">
-                <span class="user-name">{{.User.Name}}</span>
+                <span class="user-chip">
+                    <span class="avatar" aria-hidden="true">{{initial .User.Name}}</span>
+                    {{.User.Name}}
+                </span>
                 <form method="post" action="/logout">
-                    <button type="submit" class="button button-ghost">Déconnexion</button>
+                    <button type="submit" class="button button-ghost button-sm">Déconnexion</button>
                 </form>
             </nav>
             {{end}}
         </div>
     </header>
 
-    <main class="container">
-        {{/* Le message flash est affiché une seule fois, puis oublié :
-             il est porté par un cookie que le handler efface au rendu. */}}
-        {{with .Flash}}
-        <p class="alert alert-success" role="status">{{.}}</p>
-        {{end}}
-
-        {{with .ErrorMessage}}
-        <p class="alert alert-error" role="alert">{{.}}</p>
-        {{end}}
-
-        {{template "content" .}}
-    </main>
-
-    <footer class="site-footer">
+    <main class="site-main">
         <div class="container">
-            <p>Test technique — application de gestion de notes par espaces</p>
+            {{with .Flash}}
+            <p class="alert alert-success" role="status">{{template "iconCheck"}}{{.}}</p>
+            {{end}}
+
+            {{with .ErrorMessage}}
+            <p class="alert alert-error" role="alert">{{template "iconAlert"}}{{.}}</p>
+            {{end}}
+
+            {{template "content" .}}
         </div>
-    </footer>
+        <dialog class="modal" data-confirm-dialog aria-labelledby="confirm-title">
+            <form method="dialog" class="modal-inner">
+                <span class="modal-icon" aria-hidden="true">{{template "iconTrash"}}</span>
+                <h2 class="modal-title" id="confirm-title" data-dialog-title></h2>
+                <p class="modal-detail" data-dialog-detail></p>
+                <div class="modal-actions">
+                    <button type="submit" value="cancel" class="button">Annuler</button>
+                    <button type="submit" value="confirm" class="button button-destructive" autofocus>Supprimer</button>
+                </div>
+            </form>
+        </dialog>
+
+    </main>
+    <script src="/static/confirm.js" defer></script>
 </body>
 </html>
 {{end}}

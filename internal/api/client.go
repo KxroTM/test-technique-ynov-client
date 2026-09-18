@@ -10,24 +10,16 @@ import (
 	"time"
 )
 
-// maxResponseSize borne la taille des réponses lues depuis l'API.
-//
-// Sans cette limite, une réponse anormalement volumineuse — serveur en
-// défaut, mauvaise adresse pointant vers autre chose — pourrait saturer la
-// mémoire du client.
+// maxResponseSize borne la taille des réponses lues depuis l'API
 const maxResponseSize = 5 << 20 // 5 Mio
 
-// Client dialogue avec le serveur API.
+// Client dialogue avec le serveur API
 type Client struct {
 	baseURL string
 	http    *http.Client
 }
 
-// NewClient construit le client.
-//
-// Le http.Client est créé ici avec un délai d'expiration explicite. Le client
-// par défaut de la bibliothèque standard n'en a aucun : une API qui ne répond
-// pas bloquerait la requête de l'utilisateur indéfiniment.
+// NewClient construit le client
 func NewClient(baseURL string) *Client {
 	return &Client{
 		baseURL: baseURL,
@@ -37,11 +29,9 @@ func NewClient(baseURL string) *Client {
 	}
 }
 
-// ---------------------------------------------------------------------------
 // Authentification
-// ---------------------------------------------------------------------------
 
-// Register crée un compte utilisateur.
+// Register crée un compte utilisateur
 func (c *Client) Register(ctx context.Context, email, password, name string) (*User, error) {
 	body := map[string]string{"email": email, "password": password, "name": name}
 
@@ -52,7 +42,7 @@ func (c *Client) Register(ctx context.Context, email, password, name string) (*U
 	return &user, nil
 }
 
-// Login authentifie un utilisateur et retourne son jeton.
+// Login authentifie un utilisateur et retourne son jeton
 func (c *Client) Login(ctx context.Context, email, password string) (*LoginResult, error) {
 	body := map[string]string{"email": email, "password": password}
 
@@ -63,7 +53,7 @@ func (c *Client) Login(ctx context.Context, email, password string) (*LoginResul
 	return &result, nil
 }
 
-// Me retourne le profil de l'utilisateur authentifié.
+// Me retourne le profil de l'utilisateur authentifié
 func (c *Client) Me(ctx context.Context, token string) (*User, error) {
 	var user User
 	if err := c.do(ctx, http.MethodGet, "/api/me", token, nil, &user); err != nil {
@@ -72,11 +62,9 @@ func (c *Client) Me(ctx context.Context, token string) (*User, error) {
 	return &user, nil
 }
 
-// ---------------------------------------------------------------------------
 // Espaces
-// ---------------------------------------------------------------------------
 
-// ListSpaces retourne les espaces de l'utilisateur.
+// ListSpaces retourne les espaces de l'utilisateur
 func (c *Client) ListSpaces(ctx context.Context, token string) ([]Space, error) {
 	var spaces []Space
 	if err := c.do(ctx, http.MethodGet, "/api/spaces", token, nil, &spaces); err != nil {
@@ -85,7 +73,7 @@ func (c *Client) ListSpaces(ctx context.Context, token string) ([]Space, error) 
 	return spaces, nil
 }
 
-// GetSpace retourne un espace de l'utilisateur.
+// GetSpace retourne un espace de l'utilisateur
 func (c *Client) GetSpace(ctx context.Context, token string, spaceID int64) (*Space, error) {
 	var space Space
 	path := fmt.Sprintf("/api/spaces/%d", spaceID)
@@ -95,7 +83,7 @@ func (c *Client) GetSpace(ctx context.Context, token string, spaceID int64) (*Sp
 	return &space, nil
 }
 
-// CreateSpace crée un espace.
+// CreateSpace crée un espace
 func (c *Client) CreateSpace(ctx context.Context, token, name, description string) (*Space, error) {
 	body := map[string]string{"name": name, "description": description}
 
@@ -106,7 +94,7 @@ func (c *Client) CreateSpace(ctx context.Context, token, name, description strin
 	return &space, nil
 }
 
-// UpdateSpace modifie un espace.
+// UpdateSpace modifie un espace
 func (c *Client) UpdateSpace(ctx context.Context, token string, spaceID int64, name, description string) (*Space, error) {
 	body := map[string]string{"name": name, "description": description}
 
@@ -118,20 +106,15 @@ func (c *Client) UpdateSpace(ctx context.Context, token string, spaceID int64, n
 	return &space, nil
 }
 
-// DeleteSpace supprime un espace et ses notes.
+// DeleteSpace supprime un espace et ses notes
 func (c *Client) DeleteSpace(ctx context.Context, token string, spaceID int64) error {
 	path := fmt.Sprintf("/api/spaces/%d", spaceID)
 	return c.do(ctx, http.MethodDelete, path, token, nil, nil)
 }
 
-// ---------------------------------------------------------------------------
 // Notes
-// ---------------------------------------------------------------------------
 
-// ListSpaceNotes retourne un espace accompagné de ses notes.
-//
-// L'API renvoie les deux dans une seule réponse : la page d'un espace a besoin
-// de son nom pour son titre et de ses notes pour sa liste.
+// ListSpaceNotes retourne un espace accompagné de ses notes
 func (c *Client) ListSpaceNotes(ctx context.Context, token string, spaceID int64) (*SpaceWithNotes, error) {
 	var result SpaceWithNotes
 	path := fmt.Sprintf("/api/spaces/%d/notes", spaceID)
@@ -141,7 +124,7 @@ func (c *Client) ListSpaceNotes(ctx context.Context, token string, spaceID int64
 	return &result, nil
 }
 
-// CreateNote ajoute une note dans un espace.
+// CreateNote ajoute une note dans un espace
 func (c *Client) CreateNote(ctx context.Context, token string, spaceID int64, title, content string, status NoteStatus) (*Note, error) {
 	body := map[string]any{"title": title, "content": content, "status": status}
 
@@ -153,7 +136,7 @@ func (c *Client) CreateNote(ctx context.Context, token string, spaceID int64, ti
 	return &note, nil
 }
 
-// GetNote retourne une note de l'utilisateur.
+// GetNote retourne une note de l'utilisateur
 func (c *Client) GetNote(ctx context.Context, token string, noteID int64) (*Note, error) {
 	var note Note
 	path := fmt.Sprintf("/api/notes/%d", noteID)
@@ -163,7 +146,7 @@ func (c *Client) GetNote(ctx context.Context, token string, noteID int64) (*Note
 	return &note, nil
 }
 
-// UpdateNote modifie une note.
+// UpdateNote modifie une note
 func (c *Client) UpdateNote(ctx context.Context, token string, noteID int64, title, content string, status NoteStatus) (*Note, error) {
 	body := map[string]any{"title": title, "content": content, "status": status}
 
@@ -175,25 +158,15 @@ func (c *Client) UpdateNote(ctx context.Context, token string, noteID int64, tit
 	return &note, nil
 }
 
-// DeleteNote supprime une note.
+// DeleteNote supprime une note
 func (c *Client) DeleteNote(ctx context.Context, token string, noteID int64) error {
 	path := fmt.Sprintf("/api/notes/%d", noteID)
 	return c.do(ctx, http.MethodDelete, path, token, nil, nil)
 }
 
-// ---------------------------------------------------------------------------
 // Mécanique commune
-// ---------------------------------------------------------------------------
 
-// do exécute une requête vers l'API et décode la réponse.
-//
-// Toutes les méthodes publiques passent par ici. Centraliser la construction
-// de la requête, l'ajout du jeton, le traitement des codes d'erreur et le
-// décodage évite de répéter une quinzaine de fois la même séquence, et
-// garantit que chaque appel se comporte de la même manière.
-//
-// requestBody et responseTarget peuvent être nil : une suppression n'envoie
-// rien et ne retourne rien.
+// do exécute une requête vers l'API et décode la réponse
 func (c *Client) do(ctx context.Context, method, path, token string, requestBody, responseTarget any) error {
 	var bodyReader io.Reader
 	if requestBody != nil {
@@ -218,9 +191,6 @@ func (c *Client) do(ctx context.Context, method, path, token string, requestBody
 
 	response, err := c.http.Do(request)
 	if err != nil {
-		// Erreur de transport : API arrêtée, adresse injoignable, délai
-		// dépassé. Ce n'est pas une erreur applicative, elle ne porte donc
-		// pas de code de statut.
 		return fmt.Errorf("serveur injoignable : %w", err)
 	}
 	defer response.Body.Close()
@@ -234,7 +204,6 @@ func (c *Client) do(ctx context.Context, method, path, token string, requestBody
 		return parseErrorResponse(response.StatusCode, payload)
 	}
 
-	// 204 No Content : rien à décoder, comme pour les suppressions.
 	if responseTarget == nil || response.StatusCode == http.StatusNoContent {
 		return nil
 	}
@@ -246,12 +215,7 @@ func (c *Client) do(ctx context.Context, method, path, token string, requestBody
 	return nil
 }
 
-// parseErrorResponse construit une *Error à partir d'une réponse en échec.
-//
-// Le corps est censé suivre le format d'erreur de l'API. S'il ne le suit pas
-// — proxy renvoyant du HTML, serveur en défaut — on retombe sur un message
-// générique construit depuis le code de statut, plutôt que d'échouer au
-// décodage et de masquer l'erreur d'origine.
+// parseErrorResponse construit une *Error à partir d'une réponse en échec
 func parseErrorResponse(statusCode int, payload []byte) error {
 	var decoded struct {
 		Error  string            `json:"error"`
@@ -270,4 +234,15 @@ func parseErrorResponse(statusCode int, payload []byte) error {
 		Message:    decoded.Error,
 		Fields:     decoded.Fields,
 	}
+}
+
+// LoginWithGoogle échange un code d'autorisation Google contre un jeton de session
+func (c *Client) LoginWithGoogle(ctx context.Context, code, redirectURI string) (*LoginResult, error) {
+	body := map[string]string{"code": code, "redirect_uri": redirectURI}
+
+	var result LoginResult
+	if err := c.do(ctx, http.MethodPost, "/api/auth/google", "", body, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
 }

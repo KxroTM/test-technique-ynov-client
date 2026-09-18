@@ -1,38 +1,35 @@
 {{define "content"}}
-{{/*
-  Une seule page sert à la création et à la modification d'un espace.
-
-  Les deux formulaires ont les mêmes champs et les mêmes règles de validation.
-  En dupliquer un serait s'exposer à ce que les deux divergent : une contrainte
-  ajoutée d'un côté et oubliée de l'autre. Ce qui change est porté par les
-  données : le titre, l'action du formulaire et le libellé du bouton.
-*/}}
 <nav class="breadcrumb">
     <a href="/spaces">Mes espaces</a>
-    <span aria-hidden="true">/</span>
+    <span class="breadcrumb-sep" aria-hidden="true">/</span>
     <span>{{.Title}}</span>
 </nav>
 
-<section class="card form-card">
-    <h1>{{.Title}}</h1>
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{{.Title}}</h1>
+        <p class="page-subtitle">Un espace regroupe des notes autour d'un même thème.</p>
+    </div>
+</div>
 
+<section class="card form-card">
     <form method="post" action="{{.FormAction}}" class="form">
-        <div class="form-group">
+        <div class="field">
             <label for="name">Nom de l'espace</label>
             <input type="text" id="name" name="name" value="{{.Form.Name}}"
-                   maxlength="100" required autofocus>
-            <span class="field-hint">Par exemple : Devoirs, Jobs, Personnel.</span>
+                   placeholder="Devoirs" maxlength="100" required autofocus>
+            <span class="hint">Par exemple : Devoirs, Jobs, Personnel.</span>
             {{template "fieldError" (index .FieldErrors "name")}}
         </div>
 
-        <div class="form-group">
-            <label for="description">Description <span class="muted">(facultative)</span></label>
-            <textarea id="description" name="description" rows="4"
-                      maxlength="1000">{{.Form.Description}}</textarea>
+        <div class="field">
+            <label for="description">Description <span class="hint">(facultative)</span></label>
+            <textarea id="description" name="description" rows="4" maxlength="1000"
+                      placeholder="Travaux scolaires et rendus à préparer">{{.Form.Description}}</textarea>
             {{template "fieldError" (index .FieldErrors "description")}}
         </div>
 
-        <div class="form-buttons">
+        <div class="form-actions">
             <button type="submit" class="button button-primary">{{.SubmitLabel}}</button>
             <a class="button button-ghost" href="{{.CancelURL}}">Annuler</a>
         </div>

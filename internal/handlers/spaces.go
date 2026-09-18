@@ -8,7 +8,7 @@ import (
 	"github.com/KxroTM/test-technique-ynov-client/internal/api"
 )
 
-// ListSpaces affiche la liste des espaces de l'utilisateur.
+// ListSpaces affiche la liste des espaces de l'utilisateur
 func (h *Handler) ListSpaces(w http.ResponseWriter, r *http.Request, user *api.User, token string) {
 	spaces, err := h.api.ListSpaces(r.Context(), token)
 	if err != nil {
@@ -23,7 +23,7 @@ func (h *Handler) ListSpaces(w http.ResponseWriter, r *http.Request, user *api.U
 	h.render(w, http.StatusOK, "spaces.html", data)
 }
 
-// ShowSpace affiche un espace et ses notes.
+// ShowSpace affiche un espace et ses notes
 func (h *Handler) ShowSpace(w http.ResponseWriter, r *http.Request, user *api.User, token string) {
 	spaceID, ok := pathID(r, "spaceID")
 	if !ok {
@@ -31,8 +31,6 @@ func (h *Handler) ShowSpace(w http.ResponseWriter, r *http.Request, user *api.Us
 		return
 	}
 
-	// Un seul appel retourne l'espace et ses notes : l'API les renvoie
-	// ensemble parce que cette page a besoin des deux.
 	result, err := h.api.ListSpaceNotes(r.Context(), token, spaceID)
 	if err != nil {
 		h.handleAPIError(w, r, user, err)
@@ -43,11 +41,13 @@ func (h *Handler) ShowSpace(w http.ResponseWriter, r *http.Request, user *api.Us
 	data.Flash = takeFlash(w, r)
 	data.Space = result.Space
 	data.Notes = result.Notes
+	data.Board = buildBoard(result.Notes)
+	data.Progress = donePercent(data.Board)
 
 	h.render(w, http.StatusOK, "space_detail.html", data)
 }
 
-// NewSpace affiche le formulaire de création d'un espace.
+// NewSpace affiche le formulaire de création d'un espace
 func (h *Handler) NewSpace(w http.ResponseWriter, r *http.Request, user *api.User, _ string) {
 	data := newPageData("Nouvel espace", user)
 	data.Form = spaceForm{}
@@ -58,7 +58,7 @@ func (h *Handler) NewSpace(w http.ResponseWriter, r *http.Request, user *api.Use
 	h.render(w, http.StatusOK, "space_form.html", data)
 }
 
-// CreateSpace traite l'envoi du formulaire de création.
+// CreateSpace traite l'envoi du formulaire de création
 func (h *Handler) CreateSpace(w http.ResponseWriter, r *http.Request, user *api.User, token string) {
 	form := spaceForm{
 		Name:        r.FormValue("name"),
@@ -75,11 +75,7 @@ func (h *Handler) CreateSpace(w http.ResponseWriter, r *http.Request, user *api.
 	http.Redirect(w, r, fmt.Sprintf("/spaces/%d", space.ID), http.StatusSeeOther)
 }
 
-// EditSpace affiche le formulaire de modification d'un espace.
-//
-// L'espace est relu depuis l'API pour pré-remplir le formulaire. Cette lecture
-// sert aussi de contrôle d'accès : si l'espace n'appartient pas à
-// l'utilisateur, l'API répond 404 et le formulaire ne s'affiche jamais.
+// EditSpace affiche le formulaire de modification d'un espace
 func (h *Handler) EditSpace(w http.ResponseWriter, r *http.Request, user *api.User, token string) {
 	spaceID, ok := pathID(r, "spaceID")
 	if !ok {
@@ -103,7 +99,7 @@ func (h *Handler) EditSpace(w http.ResponseWriter, r *http.Request, user *api.Us
 	h.render(w, http.StatusOK, "space_form.html", data)
 }
 
-// UpdateSpace traite l'envoi du formulaire de modification.
+// UpdateSpace traite l'envoi du formulaire de modification
 func (h *Handler) UpdateSpace(w http.ResponseWriter, r *http.Request, user *api.User, token string) {
 	spaceID, ok := pathID(r, "spaceID")
 	if !ok {
@@ -128,7 +124,7 @@ func (h *Handler) UpdateSpace(w http.ResponseWriter, r *http.Request, user *api.
 	http.Redirect(w, r, fmt.Sprintf("/spaces/%d", space.ID), http.StatusSeeOther)
 }
 
-// DeleteSpace supprime un espace et ses notes.
+// DeleteSpace supprime un espace et ses notes
 func (h *Handler) DeleteSpace(w http.ResponseWriter, r *http.Request, user *api.User, token string) {
 	spaceID, ok := pathID(r, "spaceID")
 	if !ok {
@@ -145,12 +141,7 @@ func (h *Handler) DeleteSpace(w http.ResponseWriter, r *http.Request, user *api.
 	http.Redirect(w, r, "/spaces", http.StatusSeeOther)
 }
 
-// renderSpaceFormError réaffiche le formulaire d'espace après un échec.
-//
-// La création et la modification partagent ce traitement : seules l'action du
-// formulaire et les libellés changent. Les erreurs de validation réaffichent
-// le formulaire ; une ressource introuvable ou une panne relèvent en revanche
-// d'une page d'erreur.
+// renderSpaceFormError réaffiche le formulaire d'espace après un échec
 func (h *Handler) renderSpaceFormError(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -176,4 +167,42 @@ func (h *Handler) renderSpaceFormError(
 	applyAPIError(&data, err)
 
 	h.render(w, statusForFormError(err), "space_form.html", data)
+}
+
+// boardColumn regroupe les notes d'un même état pour l'affichage en colonnes
+type boardColumn struct {
+	Status  api.NoteStatus
+	Notes   []api.Note
+	Percent int
+}
+
+// buildBoard répartit les notes d'un espace dans une colonne par état et calcule leur part du total
+func buildBoard(notes []api.Note) []boardColumn {
+	statuses := api.AllStatuses()
+	columns := make([]boardColumn, 0, len(statuses))
+
+	for _, status := range statuses {
+		column := boardColumn{Status: status, Notes: []api.Note{}}
+		for _, note := range notes {
+			if note.Status == status {
+				column.Notes = append(column.Notes, note)
+			}
+		}
+		if len(notes) > 0 {
+			column.Percent = len(column.Notes) * 100 / len(notes)
+		}
+		columns = append(columns, column)
+	}
+
+	return columns
+}
+
+// donePercent retourne la part de notes terminées pour la jauge
+func donePercent(columns []boardColumn) int {
+	for _, column := range columns {
+		if column.Status == api.StatusDone {
+			return column.Percent
+		}
+	}
+	return 0
 }

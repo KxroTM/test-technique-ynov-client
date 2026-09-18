@@ -8,12 +8,7 @@ import (
 	"github.com/KxroTM/test-technique-ynov-client/internal/api"
 )
 
-// NewNote affiche le formulaire d'ajout d'une note dans un espace.
-//
-// L'espace est lu avant d'afficher le formulaire, pour deux raisons : son nom
-// est affiché sur la page, et cette lecture vérifie que l'espace appartient
-// bien à l'utilisateur. Une note ne peut donc pas être saisie pour un espace
-// inaccessible.
+// NewNote affiche le formulaire d'ajout d'une note dans un espace
 func (h *Handler) NewNote(w http.ResponseWriter, r *http.Request, user *api.User, token string) {
 	spaceID, ok := pathID(r, "spaceID")
 	if !ok {
@@ -30,7 +25,7 @@ func (h *Handler) NewNote(w http.ResponseWriter, r *http.Request, user *api.User
 	data := newPageData("Nouvelle note", user)
 	data.Space = space
 	data.Statuses = api.AllStatuses()
-	data.Form = noteForm{Status: api.StatusTodo}
+	data.Form = noteForm{Status: statusFromQuery(r)}
 	data.FormAction = fmt.Sprintf("/spaces/%d/notes/new", space.ID)
 	data.SubmitLabel = "Ajouter la note"
 	data.CancelURL = fmt.Sprintf("/spaces/%d", space.ID)
@@ -38,7 +33,7 @@ func (h *Handler) NewNote(w http.ResponseWriter, r *http.Request, user *api.User
 	h.render(w, http.StatusOK, "note_form.html", data)
 }
 
-// CreateNote traite l'envoi du formulaire d'ajout.
+// CreateNote traite l'envoi du formulaire d'ajout
 func (h *Handler) CreateNote(w http.ResponseWriter, r *http.Request, user *api.User, token string) {
 	spaceID, ok := pathID(r, "spaceID")
 	if !ok {
@@ -62,7 +57,7 @@ func (h *Handler) CreateNote(w http.ResponseWriter, r *http.Request, user *api.U
 	http.Redirect(w, r, fmt.Sprintf("/spaces/%d", spaceID), http.StatusSeeOther)
 }
 
-// EditNote affiche le formulaire de modification d'une note.
+// EditNote affiche le formulaire de modification d'une note
 func (h *Handler) EditNote(w http.ResponseWriter, r *http.Request, user *api.User, token string) {
 	noteID, ok := pathID(r, "noteID")
 	if !ok {
@@ -76,9 +71,6 @@ func (h *Handler) EditNote(w http.ResponseWriter, r *http.Request, user *api.Use
 		return
 	}
 
-	// L'espace est lu pour afficher son nom dans le fil d'Ariane. La note
-	// étant déjà accessible, cette lecture ne peut pas échouer pour une
-	// raison de droits.
 	space, err := h.api.GetSpace(r.Context(), token, note.SpaceID)
 	if err != nil {
 		h.handleAPIError(w, r, user, err)
@@ -96,7 +88,7 @@ func (h *Handler) EditNote(w http.ResponseWriter, r *http.Request, user *api.Use
 	h.render(w, http.StatusOK, "note_form.html", data)
 }
 
-// UpdateNote traite l'envoi du formulaire de modification.
+// UpdateNote traite l'envoi du formulaire de modification
 func (h *Handler) UpdateNote(w http.ResponseWriter, r *http.Request, user *api.User, token string) {
 	noteID, ok := pathID(r, "noteID")
 	if !ok {
@@ -112,8 +104,6 @@ func (h *Handler) UpdateNote(w http.ResponseWriter, r *http.Request, user *api.U
 
 	note, err := h.api.UpdateNote(r.Context(), token, noteID, form.Title, form.Content, form.Status)
 	if err != nil {
-		// L'espace de la note est inconnu en cas d'échec : on le retrouve en
-		// relisant la note, afin de pouvoir réafficher le formulaire complet.
 		spaceID := int64(0)
 		if existing, readErr := h.api.GetNote(r.Context(), token, noteID); readErr == nil {
 			spaceID = existing.SpaceID
@@ -128,11 +118,7 @@ func (h *Handler) UpdateNote(w http.ResponseWriter, r *http.Request, user *api.U
 	http.Redirect(w, r, fmt.Sprintf("/spaces/%d", note.SpaceID), http.StatusSeeOther)
 }
 
-// DeleteNote supprime une note.
-//
-// L'espace de la note est lu avant la suppression : après celle-ci, la note
-// n'existe plus et son espace serait impossible à retrouver pour construire
-// la redirection.
+// DeleteNote supprime une note
 func (h *Handler) DeleteNote(w http.ResponseWriter, r *http.Request, user *api.User, token string) {
 	noteID, ok := pathID(r, "noteID")
 	if !ok {
@@ -155,7 +141,7 @@ func (h *Handler) DeleteNote(w http.ResponseWriter, r *http.Request, user *api.U
 	http.Redirect(w, r, fmt.Sprintf("/spaces/%d", note.SpaceID), http.StatusSeeOther)
 }
 
-// renderNoteFormError réaffiche le formulaire de note après un échec.
+// renderNoteFormError réaffiche le formulaire de note après un échec
 func (h *Handler) renderNoteFormError(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -177,8 +163,6 @@ func (h *Handler) renderNoteFormError(
 
 	space, readErr := h.api.GetSpace(r.Context(), token, spaceID)
 	if readErr != nil {
-		// Le formulaire ne peut pas être réaffiché sans son espace : le
-		// gabarit en a besoin pour le fil d'Ariane et le titre.
 		h.handleAPIError(w, r, user, readErr)
 		return
 	}
@@ -193,4 +177,55 @@ func (h *Handler) renderNoteFormError(
 	applyAPIError(&data, err)
 
 	h.render(w, statusForFormError(err), "note_form.html", data)
+}
+
+// UpdateNoteStatus change uniquement l'état d'une note, sans toucher à son titre ni à son contenu
+func (h *Handler) UpdateNoteStatus(w http.ResponseWriter, r *http.Request, user *api.User, token string) {
+	noteID, ok := pathID(r, "noteID")
+	if !ok {
+		h.notFound(w, r, user)
+		return
+	}
+
+	status := api.NoteStatus(r.FormValue("status"))
+	if !status.IsValid() {
+		h.notFound(w, r, user)
+		return
+	}
+
+	note, err := h.api.GetNote(r.Context(), token, noteID)
+	if err != nil {
+		h.handleAPIError(w, r, user, err)
+		return
+	}
+
+	if _, err := h.api.UpdateNote(r.Context(), token, noteID, note.Title, note.Content, status); err != nil {
+		if isBackgroundRequest(r) {
+			http.Error(w, "déplacement impossible", statusForFormError(err))
+			return
+		}
+		h.handleAPIError(w, r, user, err)
+		return
+	}
+
+	if isBackgroundRequest(r) {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/spaces/%d", note.SpaceID), http.StatusSeeOther)
+}
+
+// statusFromQuery lit l'état pré-sélectionné passé en paramètre d'URL par une colonne du board
+func statusFromQuery(r *http.Request) api.NoteStatus {
+	status := api.NoteStatus(r.URL.Query().Get("status"))
+	if !status.IsValid() {
+		return api.StatusTodo
+	}
+	return status
+}
+
+// isBackgroundRequest distingue un appel fetch du script de board d'une soumission de formulaire classique
+func isBackgroundRequest(r *http.Request) bool {
+	return r.Header.Get("X-Board-Request") == "1"
 }
