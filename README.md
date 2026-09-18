@@ -98,8 +98,6 @@ L'application est accessible sur **http://localhost:3000**.
 | `alice@example.com` | `password123` |
 | `bob@example.com`   | `password123` |
 
-Ces identifiants sont rappelés directement sur la page de connexion.
-
 Connectez-vous avec les deux comptes tour à tour pour constater le
 cloisonnement : les espaces et les notes de l'un ne sont jamais visibles
 depuis l'autre, y compris en saisissant à la main l'URL d'une ressource
@@ -111,6 +109,7 @@ appartenant à l'autre compte.
 |-------|---------|
 | Connexion | `/login` |
 | Inscription | `/register` |
+| Déconnexion | `POST /logout` |
 | Connexion Google | `/auth/google` |
 | Liste des espaces | `/spaces` |
 | Création d'un espace | `/spaces/new` |
@@ -161,9 +160,6 @@ go vet ./...
 Le document `docs/documentation-technique.pdf` couvre l'ensemble de la solution,
 serveur et client : choix techniques, architecture, modélisation, partis pris
 d'implémentation et vérifications. Il est identique dans les deux dépôts.
-
-Sa source HTML (`docs/documentation-technique.html`) est versionnée à côté du
-PDF, afin de rester comparable d'une version à l'autre.
 
 ## Structure du projet
 
