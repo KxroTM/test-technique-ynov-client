@@ -1,38 +1,39 @@
 {{define "content"}}
 <div class="auth-layout">
     <section class="card auth-card">
-        <h1>Créer un compte</h1>
-        <p class="muted">Quelques secondes suffisent.</p>
+        <div class="auth-logo">{{template "logoMark"}}</div>
+        <div class="auth-head">
+            <h1>Créer un compte</h1>
+            <p>Quelques secondes suffisent.</p>
+        </div>
 
         <form method="post" action="/register" class="form">
-            <div class="form-group">
+            <div class="field">
                 <label for="name">Nom ou pseudo</label>
                 <input type="text" id="name" name="name" value="{{.Form.Name}}"
-                       autocomplete="nickname" required autofocus>
+                       placeholder="Alice" autocomplete="nickname" required autofocus>
                 {{template "fieldError" (index .FieldErrors "name")}}
             </div>
 
-            <div class="form-group">
+            <div class="field">
                 <label for="email">Adresse email</label>
                 <input type="email" id="email" name="email" value="{{.Form.Email}}"
-                       autocomplete="email" required>
+                       placeholder="vous@exemple.com" autocomplete="email" required>
                 {{template "fieldError" (index .FieldErrors "email")}}
             </div>
 
-            <div class="form-group">
+            <div class="field">
                 <label for="password">Mot de passe</label>
                 <input type="password" id="password" name="password"
-                       autocomplete="new-password" minlength="8" required>
-                {{/* La contrainte de 8 caractères est répétée ici par
-                     l'attribut minlength, mais elle reste vérifiée par le
-                     serveur : la validation du navigateur est un confort,
-                     pas une sécurité, et se contourne trivialement. */}}
-                <span class="field-hint">8 caractères minimum.</span>
+                       placeholder="••••••••" autocomplete="new-password" minlength="8" required>
+                <span class="hint">8 caractères minimum.</span>
                 {{template "fieldError" (index .FieldErrors "password")}}
             </div>
 
             <button type="submit" class="button button-primary button-block">Créer mon compte</button>
         </form>
+
+        {{if .GoogleEnabled}}{{template "googleButton"}}{{end}}
 
         <p class="auth-switch">
             Déjà inscrit ? <a href="/login">Se connecter</a>

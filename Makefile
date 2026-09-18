@@ -14,15 +14,6 @@ run: ## Lance le client web
 build: ## Compile le client dans bin/
 	go build -o bin/web .
 
-.PHONY: test
-test: ## Lance l'ensemble des tests
-	go test ./... -v
-
-.PHONY: test-coverage
-test-coverage: ## Lance les tests et affiche le taux de couverture
-	go test ./... -coverprofile=coverage.out
-	go tool cover -func=coverage.out
-
 .PHONY: fmt
 fmt: ## Formate le code source
 	go fmt ./...

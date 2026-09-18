@@ -1,33 +1,45 @@
-{{/*
-  Carte d'une note dans la liste d'un espace.
-
-  Les actions de modification et de suppression sont des formulaires POST et
-  non des liens : un lien est une requête GET, que le navigateur peut
-  préparer à l'avance. Une suppression déclenchée par un GET peut donc partir
-  sans que l'utilisateur ait cliqué.
-*/}}
 {{define "noteCard"}}
-<article class="note-card status-{{.Status}}">
-    <header class="note-card-header">
-        <h3 class="note-title">{{.Title}}</h3>
-        <span class="badge badge-{{.Status}}">{{.Status.Label}}</span>
-    </header>
+<article class="note" data-note-id="{{.ID}}" data-status="{{.Status}}" draggable="true">
+    <h3 class="note-title"><a href="/notes/{{.ID}}/edit">{{.Title}}</a></h3>
 
     {{with .Content}}
-    <p class="note-content">{{truncate . 220}}</p>
+    <p class="note-excerpt">{{truncate . 140}}</p>
     {{end}}
 
-    <footer class="note-card-footer">
-        <span class="note-date">Modifiée le {{formatDate .UpdatedAt}}</span>
+    <div class="note-foot">
+        <span class="note-date">{{relativeAge .UpdatedAt}}</span>
 
         <div class="note-actions">
-            <a class="button button-small" href="/notes/{{.ID}}/edit">Modifier</a>
+            <form class="move-form" method="post" action="/notes/{{.ID}}/status">
+                <button type="submit" name="status" value="{{.Status.Prev}}" class="icon-button"
+                        data-direction="prev" title="Déplacer vers « {{.Status.Prev.Label}} »"
+                        {{if eq .Status "todo"}}hidden{{end}}>
+                    {{template "iconLeft"}}
+                    <span class="visually-hidden">Déplacer « {{.Title}} » vers {{.Status.Prev.Label}}</span>
+                </button>
+
+                <button type="submit" name="status" value="{{.Status.Next}}" class="icon-button"
+                        data-direction="next" title="Déplacer vers « {{.Status.Next.Label}} »"
+                        {{if eq .Status "done"}}hidden{{end}}>
+                    {{template "iconRight"}}
+                    <span class="visually-hidden">Déplacer « {{.Title}} » vers {{.Status.Next.Label}}</span>
+                </button>
+            </form>
+
+            <a class="icon-button" href="/notes/{{.ID}}/edit" title="Modifier">
+                {{template "iconPencil"}}
+                <span class="visually-hidden">Modifier « {{.Title}} »</span>
+            </a>
 
             <form method="post" action="/notes/{{.ID}}/delete"
-                  onsubmit="return confirm('Supprimer définitivement la note « {{.Title}} » ?');">
-                <button type="submit" class="button button-small button-danger">Supprimer</button>
+                  data-confirm="Supprimer « {{.Title}} » ?"
+                  data-confirm-detail="Cette note sera définitivement supprimée.">
+                <button type="submit" class="icon-button danger" title="Supprimer">
+                    {{template "iconTrash"}}
+                    <span class="visually-hidden">Supprimer « {{.Title}} »</span>
+                </button>
             </form>
         </div>
-    </footer>
+    </div>
 </article>
 {{end}}

@@ -1,4 +1,4 @@
-# Notes — Client web
+# Notes : client web
 
 Client web de l'application de gestion de notes par espaces, développé en Go
 avec le moteur de gabarits `html/template`.
@@ -112,52 +112,40 @@ appartenant à l'autre compte.
 |----------------|-------|
 | `make run`     | Lance le client |
 | `make build`   | Compile le binaire dans `bin/` |
-| `make test`    | Lance les tests |
 | `make fmt`     | Formate le code |
 | `make vet`     | Analyse statique |
 
 Si `make` n'est pas disponible, les commandes `go` équivalentes s'utilisent
-directement (`go run .`, `go test ./...`).
+directement (`go run .`, `go build ./...`).
 
-## Tests
+## Vérifications
+
+Le projet ne comporte pas de tests automatisés, qui ne figurent pas parmi les
+attendus du sujet. Les contrôles ont été faits manuellement dans le navigateur
+et par requêtes directes :
+
+| Contrôle | Résultat attendu |
+|----------|------------------|
+| Toute page ou action protégée sans session | Redirection vers `/login` |
+| Jeton refusé par l'API | Session effacée, retour à la connexion |
+| API injoignable | Page d'erreur, **session conservée** |
+| Ressource appartenant à un autre compte | Page « introuvable » |
+| Identifiant d'URL invalide | Page « introuvable » |
+| Note dont le titre contient une balise | Échappée, jamais exécutée |
+| Erreur de saisie | Formulaire réaffiché, valeurs conservées, message sous le champ |
+| Déplacement d'une note sans JavaScript | Flèches de la carte, formulaire classique |
+| Déplacement par glisser avec JavaScript | Colonnes, compteurs et jauge mis à jour |
+| Échec réseau pendant un glisser | Carte remise en place et message affiché |
 
 ```bash
-go test ./...
+go build ./...
+go vet ./...
 ```
-
-**Aucune dépendance n'est requise pour les lancer** : ni serveur API, ni base
-de données. Les tests montent l'application complète — routeur, handlers et
-gabarits réels — devant une fausse API construite avec `httptest`. Ils
-vérifient donc ce qu'un navigateur recevrait vraiment : codes de statut,
-redirections, cookies et HTML produit.
-
-Ce que la suite couvre :
-
-| Domaine | Vérifications |
-|---------|---------------|
-| `internal/api` | Verbe et chemin de chaque appel, en-tête `Bearer`, corps JSON envoyé, classification des statuts, réponse `204` sans corps, corps d'erreur inattendu, API injoignable |
-| `internal/session` | Attributs protecteurs du cookie (`HttpOnly`, `SameSite`), expiration alignée, cycle dépôt/relecture, suppression |
-| `internal/render` | Découpe sur les runes et non les octets, coupe sur frontière de mot, formatage des dates |
-| `internal/handlers` | Redirection de toutes les pages et actions protégées, connexion et déconnexion, échappement XSS, erreurs de validation, message de confirmation affiché une seule fois, API en panne sans perte de session |
-
-Trois tests méritent d'être signalés :
-
-- **`TestClientUsesExpectedMethodAndPath`** verrouille la traduction des
-  actions : il vérifie qu'un `POST /spaces/7/edit` venu du navigateur part
-  bien en `PUT /api/spaces/7` vers l'API.
-- **`TestAPIFailureDoesNotDestroySession`** vérifie qu'une API en défaut
-  affiche une page d'erreur *sans* déconnecter l'utilisateur, tandis que
-  **`TestRejectedTokenClearsSessionAndRedirects`** vérifie qu'un jeton refusé
-  provoque bien, lui, une déconnexion.
-- **`TestNoteTitleIsEscaped`** injecte une note intitulée
-  `<script>alert(1)</script>` et contrôle qu'elle est échappée **différemment**
-  selon le contexte : en entités HTML dans le corps de la page, en séquences
-  `\u` dans l'attribut JavaScript.
 
 ## Documentation technique
 
-Le document `docs/documentation-technique.pdf` couvre l'ensemble de la solution
-— serveur et client : choix techniques, architecture, modélisation, partis pris
+Le document `docs/documentation-technique.pdf` couvre l'ensemble de la solution,
+serveur et client : choix techniques, architecture, modélisation, partis pris
 d'implémentation et limites. Il est identique dans les deux dépôts.
 
 Sa source HTML (`docs/documentation-technique.html`) est versionnée à côté du
@@ -199,8 +187,8 @@ client API qui les traduit dans le bon verbe REST :
 | Supprimer une note | `POST /notes/{id}/delete` | `DELETE /api/notes/{id}` |
 
 L'API REST reste ainsi correcte, et l'application fonctionne sans une ligne de
-JavaScript. La solution alternative — un champ caché `_method` interprété par
-le serveur — aurait fait porter au serveur une contrainte propre au HTML.
+JavaScript. La solution alternative (un champ caché `_method` interprété par
+le serveur) aurait fait porter au serveur une contrainte propre au HTML.
 
 Les suppressions sont en `POST` et non en `GET` pour une autre raison : un lien
 `GET` peut être déclenché par le préchargement d'un navigateur ou par une

@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Documentation technique — Application de gestion de notes par espaces</title>
+<title>Documentation technique : application de gestion de notes par espaces</title>
 <style>
 /*
  * Feuille de style de la documentation technique.
@@ -242,11 +242,11 @@ svg { display: block; margin: 0 auto; }
     <p class="cover-subtitle">Architecture client-serveur en Go</p>
 
     <div class="cover-meta">
-        <div><strong>Contexte</strong> — Test technique, poste de mentor<br>
+        <div><strong>Contexte</strong> : Test technique, poste de mentor<br>
             <span class="muted">Filière Informatique &amp; Cybersécurité</span></div>
-        <div><strong>Auteur</strong> — Youssef Ammari</div>
-        <div><strong>Dépôt serveur</strong> — <code>test-technique-ynov</code></div>
-        <div><strong>Dépôt client</strong> — <code>test-technique-ynov-client</code></div>
+        <div><strong>Auteur</strong> : Youssef Ammari</div>
+        <div><strong>Dépôt serveur</strong> : <code>test-technique-ynov</code></div>
+        <div><strong>Dépôt client</strong> : <code>test-technique-ynov-client</code></div>
     </div>
 </section>
 
@@ -300,9 +300,11 @@ svg { display: block; margin: 0 auto; }
                 <li>Persistance</li>
                 <li>Gestion des états de note</li>
                 <li>Contraintes propres au client HTML</li>
+                <li>Consultation des notes sous forme de board</li>
+                <li>Connexion par compte Google</li>
             </ol>
         </li>
-        <li>Stratégie de tests</li>
+        <li>Vérifications</li>
         <li>Méthode de travail et versionnement</li>
         <li>Limites, simplifications et compromis</li>
         <li>Mise en route</li>
@@ -329,7 +331,7 @@ La règle transversale, qui structure l'ensemble de la solution, est la
 suivante : <strong>un utilisateur ne doit jamais pouvoir consulter ni modifier
 les espaces et les notes d'un autre utilisateur.</strong> Cette contrainte
 n'est pas traitée comme une vérification ajoutée après coup, mais comme une
-propriété de la conception — la section 6.2 détaille comment.
+propriété de la conception, la section 6.2 détaille comment.
 </p>
 
 <h3>1.2 Couverture des fonctionnalités demandées</h3>
@@ -440,7 +442,7 @@ est traitée en section 9.
     <span class="note-title">Sur l'absence d'interfaces</span>
     Introduire une interface <code>SpaceRepository</code> pour une unique
     implémentation aurait ajouté une indirection sans bénéfice. L'abstraction
-    devient utile lorsqu'elle sert un besoin réel — plusieurs implémentations,
+    devient utile lorsqu'elle sert un besoin réel : plusieurs implémentations,
     ou un test qui ne peut pas atteindre la dépendance réelle. Ce n'est le cas
     ni de l'une ni de l'autre ici.
 </div>
@@ -524,7 +526,7 @@ Trois propriétés découlent de ce découpage :
     <li>Le client <strong>n'accède jamais à la base de données</strong>. Il ne
         connaît que l'adresse de l'API.</li>
     <li>Le client <strong>ne connaît pas le secret de signature des jetons</strong>.
-        Il reçoit un jeton, le stocke, le rejoue — il ne le vérifie pas.</li>
+        Il reçoit un jeton, le stocke, le rejoue, mais il ne le vérifie pas.</li>
     <li>Le contrôle d'accès <strong>n'est pas réimplémenté côté client</strong>.
         Celui-ci affiche ce que l'API lui retourne. La sécurité ne dépend donc
         pas du client, qui pourrait être remplacé par une application mobile
@@ -720,7 +722,7 @@ correcte quel que soit le fuseau du serveur qui la relit.
     <tr><td><code>NOT NULL</code> + FK</td><td><code>notes.space_id</code></td><td>Une note appartient obligatoirement à un espace existant</td></tr>
     <tr><td><code>CHECK (status IN …)</code></td><td><code>notes.status</code></td><td>Seuls <code>todo</code>, <code>in_progress</code> et <code>done</code> sont acceptés</td></tr>
     <tr><td><code>ON DELETE CASCADE</code></td><td>les deux FK</td><td>Supprimer un espace supprime ses notes ; supprimer un utilisateur supprime tout son contenu. Aucune ligne orpheline possible</td></tr>
-    <tr><td>Index sur <code>spaces.user_id</code> et <code>notes.space_id</code></td><td>—</td><td>Ces colonnes figurent dans toutes les clauses <code>WHERE</code> du contrôle d'accès</td></tr>
+    <tr><td>Index sur <code>spaces.user_id</code> et <code>notes.space_id</code></td><td>aucune</td><td>Ces colonnes figurent dans toutes les clauses <code>WHERE</code> du contrôle d'accès</td></tr>
 </table>
 
 <h3>5.3 Invariants garantis par la base</h3>
@@ -738,9 +740,9 @@ Chacune a été vérifiée par une tentative de violation directe en SQL :
 
 <table>
     <tr><th style="width:52%">Tentative</th><th>Résultat</th></tr>
-    <tr><td><code>INSERT … status = 'nawak'</code></td><td>Rejeté — <code>notes_status_valid</code></td></tr>
-    <tr><td><code>INSERT</code> espace « devoirs » alors que « Devoirs » existe</td><td>Rejeté — index unique insensible à la casse</td></tr>
-    <tr><td><code>INSERT</code> note sans <code>space_id</code></td><td>Rejeté — <code>NOT NULL</code></td></tr>
+    <tr><td><code>INSERT … status = 'nawak'</code></td><td>Rejeté par <code>notes_status_valid</code></td></tr>
+    <tr><td><code>INSERT</code> espace « devoirs » alors que « Devoirs » existe</td><td>Rejeté par index unique insensible à la casse</td></tr>
+    <tr><td><code>INSERT</code> note sans <code>space_id</code></td><td>Rejeté par <code>NOT NULL</code></td></tr>
     <tr><td><code>DELETE</code> d'un espace contenant 2 notes</td><td>Les 2 notes supprimées en cascade</td></tr>
 </table>
 
@@ -798,9 +800,8 @@ La vérification impose explicitement l'algorithme attendu :
     l'algorithme déclaré <em>dans le jeton lui-même</em>. Un attaquant peut
     alors forger un jeton annonçant <code>alg: none</code>, sans signature, et
     se faire passer pour n'importe quel utilisateur. C'est la faille la plus
-    répandue des implémentations JWT. Un test dédié
-    (<code>TestParseRejectsUnsignedToken</code>) verrouille ce comportement, et
-    la tentative a également été rejouée contre le serveur en fonctionnement.
+    répandue des implémentations JWT. La tentative a été rejouée contre le
+    serveur en fonctionnement : le jeton forgé est refusé.
 </div>
 
 <h4>Réponses aux échecs de connexion</h4>
@@ -870,19 +871,16 @@ traduit ce vide en <code>ErrNotFound</code>. L'opération est atomique.
 Une ressource appartenant à autrui provoque un <code>404</code>, et non un
 <code>403</code>. Répondre <code>403</code> confirmerait que la ressource
 existe, permettant à un utilisateur de cartographier les données des autres en
-énumérant les identifiants. Les deux situations — « n'existe pas » et « ne vous
-appartient pas » — sont volontairement indistinguables de l'extérieur.
+énumérant les identifiants. Les deux situations, « n'existe pas » et « ne vous
+appartient pas », sont volontairement indistinguables de l'extérieur.
 </p>
 
 <h4>Vérification</h4>
 
 <p>
-Le cloisonnement a été éprouvé de deux manières. D'abord par des tests
-d'intégration contre une vraie base
-(<code>TestSpaceRepositoryIsolatesUsers</code>,
-<code>TestNoteRepositoryIsolatesUsers</code>), qui couvrent la lecture, la
-modification, la suppression, le listage et la création. Ensuite par des
-requêtes réelles contre le serveur puis contre le client, avec deux comptes :
+Le cloisonnement a été éprouvé par des requêtes réelles contre le serveur
+puis contre le client, avec deux comptes, en ciblant directement les
+identifiants des ressources de l'autre utilisateur :
 </p>
 
 <table>
@@ -891,7 +889,7 @@ requêtes réelles contre le serveur puis contre le client, avec deux comptes :
     <tr><td>Modifier un espace</td><td><code>404</code></td></tr>
     <tr><td>Supprimer un espace</td><td><code>404</code></td></tr>
     <tr><td>Lister les notes d'un espace</td><td><code>404</code></td></tr>
-    <tr><td>Créer une note dans un espace</td><td><code>404</code> — et <strong>0 ligne insérée</strong></td></tr>
+    <tr><td>Créer une note dans un espace</td><td><code>404</code>, et <strong>0 ligne insérée</strong></td></tr>
     <tr><td>Lire, modifier ou supprimer une note</td><td><code>404</code></td></tr>
 </table>
 
@@ -1006,7 +1004,7 @@ message.
 
 <p>
 Un dernier détail distingue les deux formulaires de note : l'état est
-facultatif à la création — une note nouvelle est « non faite » par défaut —
+facultatif à la création (une note nouvelle est « non faite » par défaut)
 mais <strong>obligatoire</strong> à la modification. Un <code>PUT</code>
 remplace l'intégralité de la ressource ; accepter un état absent le
 réinitialiserait silencieusement.
@@ -1098,8 +1096,8 @@ explicites, et c'est le client API qui les traduit :
 
 <p>
 L'API REST reste ainsi correcte et l'application fonctionne sans une ligne de
-JavaScript. L'alternative — un champ caché <code>_method</code> interprété par
-le serveur — aurait fait porter à l'API une contrainte propre au HTML.
+JavaScript. L'alternative (un champ caché <code>_method</code> interprété par
+le serveur) aurait fait porter à l'API une contrainte propre au HTML.
 </p>
 
 <p>
@@ -1176,81 +1174,156 @@ puisque le statut serait déjà parti.
 <!-- 7. Tests                                                               -->
 <!-- ===================================================================== -->
 
-<h2 class="page-break">7. Stratégie de tests</h2>
+<h3>6.8 Consultation des notes sous forme de board</h3>
 
 <p>
-Les tests ont été écrits là où ils apportent une garantie, et non pour
-atteindre un taux de couverture. Ils se répartissent en trois natures.
-</p>
-
-<h3>Tests unitaires — serveur</h3>
-
-<p>
-Ils couvrent ce qui est purement algorithmique : hachage et vérification des
-mots de passe, génération et validation des jetons, validité des états de note.
-Les cas d'attaque y figurent explicitement : jeton signé avec un autre secret,
-jeton expiré, signature altérée, jeton <code>alg=none</code>.
-</p>
-
-<h3>Tests d'intégration — serveur</h3>
-
-<p>
-Ils s'exécutent <strong>contre une véritable base PostgreSQL</strong>. C'est un
-choix assumé : ce que l'on veut vérifier ici est le comportement du SQL
-lui-même — filtrage par utilisateur dans les clauses <code>WHERE</code>,
-contraintes d'unicité, suppressions en cascade. Les simuler avec un faux
-repository ne prouverait rien de ce qui compte.
+Les trois états d'une note correspondent exactement à trois colonnes. La page
+d'un espace n'est donc pas une liste verticale mais un <strong>board</strong> :
+« Non fait », « En cours », « Terminé », chaque note étant une carte. Le
+regroupement est fait en Go, dans <code>buildBoard</code>, et non dans le
+gabarit : la présentation reste déclarative, la logique reste testable.
 </p>
 
 <p>
-Deux précautions les rendent utilisables au quotidien :
-</p>
-
-<ul>
-    <li>Sans la variable <code>TEST_DATABASE_URL</code>, ils sont
-        <strong>ignorés</strong> et non en échec : <code>go test ./...</code>
-        reste exécutable sans base disponible.</li>
-    <li>Chaque test crée ses propres utilisateurs jetables et les supprime à la
-        fin. La cascade du schéma emporte leurs espaces et leurs notes. Les
-        données de démonstration ne sont jamais modifiées, et la suite peut être
-        relancée indéfiniment — ce qui a été vérifié en comparant l'état de la
-        base avant et après.</li>
-</ul>
-
-<h3>Tests de bout en bout — client</h3>
-
-<p>
-Ils montent l'application complète — routeur, handlers et <strong>gabarits
-réels</strong> — devant une fausse API construite avec <code>httptest</code>.
-Ils vérifient donc ce qu'un navigateur recevrait vraiment : codes de statut,
-redirections, cookies et HTML produit. Ni serveur ni base de données ne sont
-nécessaires pour les lancer.
-</p>
-
-<p>
-Trois d'entre eux portent l'essentiel de la valeur :
+Déplacer une note change son état. Deux chemins mènent au même résultat :
 </p>
 
 <table>
-    <tr><th style="width:42%">Test</th><th>Ce qu'il verrouille</th></tr>
-    <tr><td><code>TestClientUsesExpectedMethodAndPath</code></td><td>Qu'un <code>POST /spaces/7/edit</code> venu du navigateur part bien en <code>PUT /api/spaces/7</code></td></tr>
-    <tr><td><code>TestAPIFailureDoesNotDestroySession</code></td><td>Qu'une API en défaut n'entraîne pas de déconnexion — le test jumeau <code>TestRejectedTokenClearsSessionAndRedirects</code> vérifiant qu'un jeton refusé, lui, déconnecte bien</td></tr>
-    <tr><td><code>TestNoteTitleIsEscaped</code></td><td>Que l'échappement est appliqué, et différemment selon le contexte</td></tr>
+    <tr><th style="width:34%">Moyen</th><th>Mécanisme</th></tr>
+    <tr><td>Sans JavaScript</td><td>Deux flèches sur chaque carte, formulaire <code>POST</code>, redirection <code>303</code></td></tr>
+    <tr><td>Avec JavaScript</td><td>Glisser-déposer, appel <code>fetch</code> en arrière-plan, réponse <code>204</code></td></tr>
 </table>
 
-<h3>Vérification manuelle</h3>
-
 <p>
-Chaque fonctionnalité a en outre été éprouvée par des requêtes réelles contre
-le serveur puis le client en fonctionnement : cas nominaux, cas limites
-(identifiants non numériques ou négatifs, JSON malformé, champs hors bornes) et
-tentatives d'accès croisé entre deux comptes. Les résultats sont repris dans
-les sections correspondantes.
+Le serveur rend déjà les flèches dans le bon sens : une carte « Non fait »
+masque sa flèche gauche, une carte « Terminé » masque sa droite. Le script ne
+contient aucun libellé ni aucun ordre d'états codé en dur, il les lit dans le
+HTML produit par Go. En cas d'échec réseau, la carte revient à sa place, la
+jauge d'avancement est restaurée et un message apparaît.
 </p>
 
-<!-- ===================================================================== -->
-<!-- 8. Méthode                                                             -->
-<!-- ===================================================================== -->
+<h3>6.9 Connexion par compte Google</h3>
+
+<p>
+Fonctionnalité facultative, activée par la présence d'identifiants OAuth. La
+répartition suit le principe déjà posé : <strong>l'API possède
+l'authentification</strong>. Le client redirige vers Google avec le
+<code>client_id</code>, qui est public ; seul le serveur détient le
+<code>client_secret</code>, échange le code et émet le JWT de l'application.
+</p>
+
+<p>
+L'échange se fait avec la bibliothèque standard, sans dépendance
+supplémentaire. La signature du jeton d'identité n'est pas revérifiée : il est
+reçu directement de Google sur un canal HTTPS authentifié, cas que la
+documentation Google dispense explicitement de vérification.
+</p>
+
+<p>
+Deux protections méritent d'être signalées. Un paramètre <code>state</code>
+aléatoire de 32 octets, déposé en cookie et comparé en temps constant au
+retour, empêche qu'un tiers fasse ouvrir une session sur <em>son</em> compte
+dans le navigateur de la victime. Et un compte existant n'est rattaché à un
+compte Google que si Google atteste que l'adresse est <strong>vérifiée</strong> :
+sans cette garde, créer un compte Google portant l'adresse d'autrui suffirait à
+prendre le contrôle du sien.
+</p>
+
+<h2 class="page-break">7. Vérifications</h2>
+
+<p>
+Le projet ne comporte pas de tests automatisés. Les tests ne figurent ni dans
+les critères d'évaluation, ni dans les contraintes obligatoires, ni dans les
+livrables attendus du sujet. C'est un choix assumé, repris en section 9 parmi
+les limites.
+</p>
+
+<p>
+Chaque fonctionnalité a en revanche été éprouvée par des requêtes réelles
+contre le serveur puis le client en fonctionnement, ainsi que par des tentatives
+de violation directe des contraintes en SQL. Les résultats sont reproduits
+ci-dessous.
+</p>
+
+<h3>7.1 Authentification</h3>
+
+<table>
+    <tr><th style="width:58%">Cas</th><th>Réponse</th></tr>
+    <tr><td>Connexion avec les identifiants de démonstration</td><td><code>200</code> et un jeton</td></tr>
+    <tr><td>Email saisi en majuscules</td><td><code>200</code>, la normalisation s'applique</td></tr>
+    <tr><td>Mot de passe erroné</td><td><code>401</code></td></tr>
+    <tr><td>Email inconnu</td><td><code>401</code>, <strong>message identique au précédent</strong></td></tr>
+    <tr><td>Requête protégée sans en-tête <code>Authorization</code></td><td><code>401</code></td></tr>
+    <tr><td>Schéma d'authentification incorrect</td><td><code>401</code></td></tr>
+    <tr><td>Jeton dont la signature a été modifiée</td><td><code>401</code></td></tr>
+    <tr><td>Jeton forgé avec <code>alg=none</code></td><td><code>401</code></td></tr>
+    <tr><td>Inscription avec un email déjà pris</td><td><code>409</code></td></tr>
+</table>
+
+<h3>7.2 Contrôle d'accès</h3>
+
+<p>
+Éprouvé avec deux comptes, d'abord contre l'API puis à travers le client, en
+ciblant directement les identifiants des ressources de l'autre utilisateur.
+</p>
+
+<table>
+    <tr><th style="width:58%">Tentative de l'utilisateur B sur les données de A</th><th>Réponse</th></tr>
+    <tr><td>Lire un espace</td><td><code>404</code></td></tr>
+    <tr><td>Modifier un espace</td><td><code>404</code></td></tr>
+    <tr><td>Supprimer un espace</td><td><code>404</code></td></tr>
+    <tr><td>Lister les notes d'un espace</td><td><code>404</code></td></tr>
+    <tr><td>Créer une note dans un espace</td><td><code>404</code>, et <strong>0 ligne insérée</strong></td></tr>
+    <tr><td>Lire, modifier ou supprimer une note</td><td><code>404</code></td></tr>
+    <tr><td>Déplacer une note entre colonnes</td><td><code>404</code></td></tr>
+</table>
+
+<p>
+Après chaque série de tentatives, les données de A ont été relues et trouvées
+intactes : aucune opération n'avait abouti, même partiellement.
+</p>
+
+<h3>7.3 Validation et cas limites</h3>
+
+<table>
+    <tr><th style="width:58%">Entrée</th><th>Réponse</th></tr>
+    <tr><td>Email invalide, mot de passe trop court, nom absent</td><td><code>400</code> avec le détail par champ</td></tr>
+    <tr><td>Corps JSON malformé</td><td><code>400</code>, message distinct de la validation</td></tr>
+    <tr><td>Identifiant d'URL non numérique ou négatif</td><td><code>400</code></td></tr>
+    <tr><td>Nom d'espace vide, description de plus de 1000 caractères</td><td><code>400</code></td></tr>
+    <tr><td>État de note hors des trois valeurs autorisées</td><td><code>400</code></td></tr>
+    <tr><td>Nom d'espace en doublon, casse différente</td><td><code>409</code></td></tr>
+    <tr><td>Même nom d'espace chez un autre utilisateur</td><td><code>201</code>, l'unicité est par utilisateur</td></tr>
+</table>
+
+<h3>7.4 Invariants de la base</h3>
+
+<p>
+Les contraintes du schéma ont été attaquées directement en SQL, en contournant
+l'application :
+</p>
+
+<table>
+    <tr><th style="width:58%">Tentative</th><th>Résultat</th></tr>
+    <tr><td><code>INSERT … status = 'nawak'</code></td><td>Rejeté par <code>notes_status_valid</code></td></tr>
+    <tr><td><code>INSERT</code> espace « devoirs » alors que « Devoirs » existe</td><td>Rejeté par l'index unique insensible à la casse</td></tr>
+    <tr><td><code>INSERT</code> note sans <code>space_id</code></td><td>Rejeté par <code>NOT NULL</code></td></tr>
+    <tr><td><code>DELETE</code> d'un espace contenant deux notes</td><td>Les deux notes supprimées en cascade</td></tr>
+</table>
+
+<h3>7.5 Client</h3>
+
+<table>
+    <tr><th style="width:58%">Situation</th><th>Comportement</th></tr>
+    <tr><td>Page ou action protégée sans session</td><td>Redirection vers la connexion</td></tr>
+    <tr><td>Jeton refusé par l'API</td><td>Session effacée, retour à la connexion</td></tr>
+    <tr><td>API arrêtée pendant la navigation</td><td>Page d'erreur, <strong>session conservée</strong></td></tr>
+    <tr><td>Note intitulée avec une balise de script</td><td>Échappée différemment selon le contexte, jamais exécutée</td></tr>
+    <tr><td>Déplacement d'une note sans JavaScript</td><td>Flèches de la carte, formulaire classique, <code>303</code></td></tr>
+    <tr><td>Déplacement par glisser avec JavaScript</td><td><code>204</code>, colonnes, compteurs et jauge mis à jour</td></tr>
+    <tr><td>Échec réseau pendant un glisser</td><td>Carte remise en place, jauge restaurée, message affiché</td></tr>
+    <tr><td>Retour Google sans jeton anti-rejeu valide</td><td>Refus et retour à la connexion</td></tr>
+</table>
 
 <h2>8. Méthode de travail et versionnement</h2>
 
@@ -1279,7 +1352,7 @@ de l'historique compile donc de façon autonome.
 Un fichier <code>.gitattributes</code> normalise les fins de ligne en LF dans
 les deux dépôts. Le développement s'est fait sous Windows : sans cette règle,
 les fichiers auraient été versionnés avec des CRLF, ce qui empêche notamment
-<code>make</code> et les scripts shell de fonctionner sous Linux.
+les scripts shell de fonctionner sous Linux.
 </p>
 
 <p>
@@ -1287,33 +1360,28 @@ Aucun secret n'est versionné. Les deux dépôts fournissent un
 <code>.env.example</code> et ignorent <code>.env</code>.
 </p>
 
-<h3>Un exemple de correction issue de cette méthode</h3>
+<h3>Un incident révélateur du fonctionnement de go:embed</h3>
 
 <p>
-La mise à jour des dépendances en fin de projet a fait apparaître un test en
-échec, <code>TestParseRejectsTamperedToken</code>. Le diagnostic mérite d'être
-rapporté, car c'est le test qui était faux et non la bibliothèque.
+Les gabarits HTML et les fichiers statiques du client sont embarqués dans le
+binaire par la directive <code>//go:embed all:templates static</code>. Lors
+d'une passe d'allègement des commentaires, cette ligne a été supprimée : elle
+ressemble à un commentaire, elle n'en est pas un.
 </p>
 
 <p>
-Le test altérait le <strong>dernier</strong> caractère de la signature. Or une
-signature HS256 fait 32 octets, encodés en 43 caractères base64url qui en
-portent 258 bits : les deux derniers bits sont du remplissage. Quatre
-caractères finaux différents décodent donc vers les mêmes octets. L'ancienne
-version de la bibliothèque rejetait ce base64 non canonique — le test passait
-pour cette raison, et non pour celle qu'il annonçait. La nouvelle l'accepte,
-révélant le défaut.
+La conséquence mérite d'être connue. Le projet a continué de <strong>compiler
+sans le moindre avertissement</strong>, la variable <code>embed.FS</code> étant
+simplement restée vide. L'erreur n'est apparue qu'au démarrage, sous la forme
+d'un « aucune page trouvée dans templates/pages » sans rapport apparent avec la
+cause.
 </p>
 
 <p>
-Le test altère désormais le <strong>premier</strong> caractère de la signature,
-qui porte des bits significatifs, et vérifie explicitement que le jeton modifié
-diffère de l'original. Le comportement de sécurité n'a jamais été en cause.
+La directive est désormais accompagnée d'un commentaire signalant qu'elle ne
+doit pas être retirée, et qu'elle doit rester accolée à la déclaration qu'elle
+concerne, sans ligne vide intercalée.
 </p>
-
-<!-- ===================================================================== -->
-<!-- 9. Limites                                                             -->
-<!-- ===================================================================== -->
 
 <h2 class="page-break">9. Limites, simplifications et compromis</h2>
 
@@ -1335,7 +1403,7 @@ du plus au moins structurant.
     <strong>Pas de révocation possible.</strong> Une API sans état ne peut pas
     invalider un jeton déjà émis. La déconnexion efface le cookie du
     navigateur, mais le jeton reste techniquement valide jusqu'à son
-    expiration. Une liste de révocation serait nécessaire — et ferait perdre
+    expiration. Une liste de révocation serait nécessaire, et ferait perdre
     l'absence d'état.
 </div>
 
@@ -1398,6 +1466,20 @@ du plus au moins structurant.
     rend le contrôle d'accès aussi simple à garantir.
 </div>
 
+<div class="limit">
+    <strong>Pas de tests automatisés.</strong> Les tests ne figurent pas parmi
+    les attendus du sujet et n'ont pas été écrits. Les vérifications de la
+    section 7 ont été menées à la main. Sur un projet destiné à vivre, une suite
+    couvrant au minimum le contrôle d'accès serait le premier ajout.
+</div>
+
+<div class="limit">
+    <strong>La connexion Google n'est pas reproductible en l'état.</strong>
+    Elle exige des identifiants OAuth propres à un projet Google Cloud, qui ne
+    peuvent pas être versionnés. Sans eux, le bouton n'apparaît pas et
+    l'application reste entièrement utilisable par email et mot de passe.
+</div>
+
 <h3>9.3 Exploitation</h3>
 
 <div class="limit">
@@ -1411,7 +1493,7 @@ du plus au moins structurant.
 
 <div class="limit">
     <strong>Le serveur n'est pas conteneurisé.</strong> Seule la base l'est.
-    C'est un choix de confort en développement — recompiler est instantané —
+    C'est un choix de confort en développement (recompiler est instantané)
     mais un <code>Dockerfile</code> serait attendu pour un déploiement.
 </div>
 
@@ -1424,8 +1506,8 @@ du plus au moins structurant.
 
 <div class="limit">
     <strong>Pas d'intégration continue.</strong> Les vérifications
-    (<code>gofmt</code>, <code>vet</code>, tests) ont été lancées à la main
-    avant chaque commit. Un workflow GitHub Actions les rendrait
+    (<code>gofmt</code>, <code>go vet</code>, compilation) ont été lancées à la
+    main avant chaque commit. Un workflow GitHub Actions les rendrait
     systématiques.
 </div>
 
@@ -1481,21 +1563,37 @@ s'affiche. C'est la démonstration la plus directe du cloisonnement décrit en
 section 6.2.
 </p>
 
-<h3>Lancer les tests</h3>
+<h3>Vérifier la compilation</h3>
 
-<pre><code># Serveur — tests unitaires
-go test ./...
-
-# Serveur — tests d'intégration (base démarrée requise)
-TEST_DATABASE_URL="postgres://notes_user:notes_password@localhost:5432/notes_db?sslmode=disable" \
-  go test ./internal/repository -v
-
-# Client — aucune dépendance requise
-go test ./...</code></pre>
+<pre><code># Dans chacun des deux dépôts
+go build ./...
+go vet ./...</code></pre>
 
 <p>
-Un <code>Makefile</code> regroupe ces commandes dans les deux dépôts
-(<code>make help</code> en donne la liste).
+Le projet ne comporte pas de tests automatisés, point repris en section 9. Le
+dépôt client fournit un <code>Makefile</code> regroupant les commandes
+courantes (<code>make help</code> en donne la liste) ; le dépôt serveur
+s'utilise directement avec <code>go run .</code> et <code>docker compose</code>.
+</p>
+
+<h3>Activer la connexion Google</h3>
+
+<p>
+Facultatif. Sans identifiants configurés, le bouton n'apparaît pas et
+l'application reste pleinement utilisable par email et mot de passe.
+</p>
+
+<pre><code># Dépôt serveur, fichier .env
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+
+# Dépôt client, fichier .env
+GOOGLE_CLIENT_ID=...   # le même, il est public</code></pre>
+
+<p>
+L'identifiant OAuth se crée sur la console Google Cloud, en type « Application
+Web », avec <code>http://localhost:3000/auth/google/callback</code> déclaré en
+URI de redirection autorisée.
 </p>
 
 </body>

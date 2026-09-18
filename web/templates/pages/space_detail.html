@@ -1,33 +1,77 @@
 {{define "content"}}
 <nav class="breadcrumb">
     <a href="/spaces">Mes espaces</a>
-    <span aria-hidden="true">/</span>
+    <span class="breadcrumb-sep" aria-hidden="true">/</span>
     <span>{{.Space.Name}}</span>
 </nav>
 
-<div class="page-header">
-    <div>
-        <h1>{{.Space.Name}}</h1>
-        {{if .Space.Description}}
-        <p class="muted">{{.Space.Description}}</p>
-        {{end}}
+<div class="page-header" data-palette="{{.Space.Palette}}">
+    <div class="page-heading">
+        <span class="space-tile space-tile-lg" aria-hidden="true">{{.Space.Initial}}</span>
+        <div>
+            <h1 class="page-title">{{.Space.Name}}</h1>
+            {{if .Space.Description}}
+            <p class="page-subtitle">{{.Space.Description}}</p>
+            {{end}}
+        </div>
     </div>
-    <a class="button button-primary" href="/spaces/{{.Space.ID}}/notes/new">Nouvelle note</a>
+    <div class="form-actions">
+        <a class="button" href="/spaces/{{.Space.ID}}/edit">Modifier l'espace</a>
+        <a class="button button-primary" href="/spaces/{{.Space.ID}}/notes/new">
+            {{template "iconPlus"}} Nouvelle note
+        </a>
+    </div>
 </div>
 
 {{if .Notes}}
-<div class="note-list">
-    {{range .Notes}}
-    {{template "noteCard" .}}
+<div class="space-stats">
+    <div class="progress" data-progress-bar role="img"
+         aria-label="{{.Progress}} % des notes de cet espace sont terminées">
+        {{range .Board}}<span class="progress-part {{.Status}}" data-part="{{.Status}}"
+              style="width: {{.Percent}}%"></span>{{end}}
+    </div>
+    <p class="meta">
+        <span data-total>{{plural (len .Notes) "note" "notes"}}</span> ·
+        <span data-done-percent>{{.Progress}}</span> % terminé
+    </p>
+</div>
+{{end}}
+
+<div class="board" data-board data-space-id="{{.Space.ID}}">
+    {{range .Board}}
+    <section class="column" data-status="{{.Status}}" aria-labelledby="col-{{.Status}}">
+        <header class="column-header">
+            <span class="column-dot" aria-hidden="true"></span>
+            <h2 class="column-title" id="col-{{.Status}}">{{.Status.Label}}</h2>
+            <span class="column-count" data-count>{{len .Notes}}</span>
+        </header>
+
+        <div class="column-body" data-dropzone>
+            {{range .Notes}}
+            {{template "noteCard" .}}
+            {{else}}
+            <p class="column-empty" data-empty>Aucune note</p>
+            {{end}}
+        </div>
+
+        <footer class="column-footer">
+            <a class="button button-ghost button-sm button-block"
+               href="/spaces/{{$.Space.ID}}/notes/new?status={{.Status}}">
+                {{template "iconPlus"}} Ajouter
+            </a>
+        </footer>
+    </section>
     {{end}}
 </div>
-{{else}}
-<div class="card empty-state">
+
+{{if not .Notes}}
+<div class="card card-padded empty-state">
+    <span class="empty-icon">{{template "iconNote"}}</span>
     <h2>Cet espace est vide</h2>
-    <p class="muted">
-        Ajoutez une première note pour commencer à remplir « {{.Space.Name}} ».
-    </p>
+    <p>Ajoutez une première note pour commencer à remplir « {{.Space.Name}} ».</p>
     <a class="button button-primary" href="/spaces/{{.Space.ID}}/notes/new">Ajouter une note</a>
 </div>
 {{end}}
+
+<script src="/static/board.js" defer></script>
 {{end}}
