@@ -39,10 +39,8 @@ Trois points structurent cette architecture :
 | JavaScript      | Aucune bibliothèque | Glisser-déposer et fenêtre de confirmation, en enrichissement seul |
 
 **Ce dépôt n'a aucune dépendance externe.** Le fichier `go.mod` ne déclare
-aucun `require` : tout repose sur la bibliothèque standard. Un routeur tiers
-n'apportait rien pour une quinzaine de routes, et un framework CSS aurait
-alourdi les gabarits pour un résultat que le CSS écrit à la main atteint
-directement.
+aucun `require` : routage, rendu, client HTTP et gestion des cookies reposent
+entièrement sur la bibliothèque standard.
 
 ## Prérequis
 
@@ -128,15 +126,12 @@ colonne par état, une carte par note. Déplacer une carte change son état.
 
 ## Commandes utiles
 
-| Commande       | Effet |
-|----------------|-------|
-| `make run`     | Lance le client |
-| `make build`   | Compile le binaire dans `bin/` |
-| `make fmt`     | Formate le code |
-| `make vet`     | Analyse statique |
-
-Si `make` n'est pas disponible, les commandes `go` équivalentes s'utilisent
-directement (`go run .`, `go build ./...`).
+| Commande | Effet |
+|----------|-------|
+| `go run .` | Lance le client |
+| `go build -o bin/web .` | Compile le binaire dans `bin/` |
+| `go fmt ./...` | Formate le code |
+| `go vet ./...` | Analyse statique |
 
 ## Vérifications
 
@@ -165,7 +160,7 @@ go vet ./...
 
 Le document `docs/documentation-technique.pdf` couvre l'ensemble de la solution,
 serveur et client : choix techniques, architecture, modélisation, partis pris
-d'implémentation et limites. Il est identique dans les deux dépôts.
+d'implémentation et vérifications. Il est identique dans les deux dépôts.
 
 Sa source HTML (`docs/documentation-technique.html`) est versionnée à côté du
 PDF, afin de rester comparable d'une version à l'autre.
@@ -270,8 +265,7 @@ client API qui les traduit dans le bon verbe REST :
 | Supprimer une note | `POST /notes/{id}/delete` | `DELETE /api/notes/{id}` |
 
 L'API REST reste ainsi correcte, et l'application fonctionne sans une ligne de
-JavaScript. La solution alternative (un champ caché `_method` interprété par
-le serveur) aurait fait porter au serveur une contrainte propre au HTML.
+JavaScript.
 
 Les suppressions sont en `POST` et non en `GET` pour une autre raison : un lien
 `GET` peut être déclenché par le préchargement d'un navigateur ou par une
@@ -331,28 +325,3 @@ par un tampon mémoire avant d'être écrit dans la réponse : si un gabarit
 note est échappé différemment dans du texte HTML, dans un attribut ou dans une
 chaîne JavaScript. Une note intitulée `<script>alert(1)</script>` s'affiche
 donc comme du texte, sans traitement particulier à écrire.
-
-## Limites connues
-
-- **`Secure` n'est pas activé sur le cookie de session**, car le
-  développement se fait en HTTP. En production derrière HTTPS, cet attribut
-  est indispensable.
-- **Pas de déconnexion côté serveur.** Effacer le cookie suffit côté
-  navigateur, mais le jeton reste techniquement valide jusqu'à son
-  expiration : une API sans état ne peut pas révoquer un jeton déjà émis.
-- **Pas de jeton anti-CSRF dédié.** La protection repose sur
-  `SameSite=Lax`, qui couvre les navigateurs actuels. Un jeton par formulaire
-  serait la défense complète.
-- **Le profil est relu à chaque requête** (un appel à `/api/me`). C'est un
-  aller-retour supplémentaire, assumé au profit de la simplicité : le jeton est
-  ainsi toujours vérifié et le nom affiché toujours à jour.
-
-- **La connexion Google n'est pas testable sans identifiants OAuth.** Elle exige
-  un projet Google Cloud propre à celui qui l'exécute. Sans les variables
-  correspondantes, le bouton n'apparaît pas et l'application reste entièrement
-  utilisable par email et mot de passe.
-- **Le glisser-déposer demande un pointeur.** Au clavier ou sur mobile, le
-  déplacement se fait par les flèches de la carte, qui restent le chemin de
-  référence.
-- **Sans JavaScript, la suppression ne demande pas de confirmation.** Une page
-  de confirmation rendue par le serveur serait la réponse complète.

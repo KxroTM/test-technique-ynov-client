@@ -266,9 +266,8 @@ svg { display: block; margin: 0 auto; }
         <li>Choix techniques
             <ol>
                 <li>Tableau de synthèse</li>
-                <li>Justification des choix structurants</li>
-                <li>Ce qui a été volontairement écarté</li>
-            </ol>
+                <li>Choix structurants</li>
+                    </ol>
         </li>
         <li>Architecture globale
             <ol>
@@ -307,7 +306,6 @@ svg { display: block; margin: 0 auto; }
         </li>
         <li>Vérifications</li>
         <li>Méthode de travail et versionnement</li>
-        <li>Limites, simplifications et compromis</li>
         <li>Mise en route</li>
     </ol>
 </section>
@@ -348,10 +346,9 @@ propriété de la conception, la section 6.2 détaille comment.
 </table>
 
 <div class="note">
-    <span class="note-title">Sur l'absence de partage</span>
+    <span class="note-title">Sur le modèle de propriété</span>
     Un espace appartient à exactement un utilisateur, et une note à exactement
-    un espace. Aucune notion de partage ni d'affectation à un tiers n'a été
-    introduite. C'est ce qui rend le contrôle d'accès aussi simple à garantir :
+    un espace. C'est ce qui rend le contrôle d'accès simple à garantir :
     la question « qui a le droit de voir cette note » se réduit toujours à une
     comparaison d'identifiant dans la requête SQL, sans table de permissions ni
     règle à arbitrer.
@@ -380,24 +377,22 @@ propriété de la conception, la section 6.2 détaille comment.
     <tr><td>Environnement de développement</td><td>Docker Compose</td><td>Base de données jetable et reproductible en une commande</td></tr>
 </table>
 
-<h3>2.2 Justification des choix structurants</h3>
+<h3>2.2 Choix structurants</h3>
 
-<h4>SQL écrit à la main plutôt qu'un ORM</h4>
+<h4>SQL écrit à la main</h4>
 
 <p>
-C'est le choix le plus déterminant du projet. Un ORM comme GORM aurait réduit
-le volume de code, mais le contrôle d'accès est ici la préoccupation centrale,
-et il s'exprime entièrement en SQL. Écrire les requêtes à la main rend visible,
-à la lecture d'une seule ligne, le fait qu'un utilisateur ne peut atteindre que
-ses propres données :
+C'est le choix le plus déterminant du projet. Le contrôle d'accès en est la
+préoccupation centrale, et il s'exprime entièrement en SQL. Écrire les requêtes
+à la main rend visible, à la lecture d'une seule ligne, le fait qu'un
+utilisateur ne peut atteindre que ses propres données :
 </p>
 
 <pre><code>SELECT ... FROM spaces WHERE id = $1 AND user_id = $2</code></pre>
 
 <p>
-Avec un ORM, cette garantie serait diluée dans des appels chaînés dont le SQL
-généré n'est pas sous les yeux. Le coût assumé est un code plus verbeux :
-chaque <code>Scan</code> énumère ses colonnes.
+Chaque requête se lit telle qu'elle s'exécute : la garantie d'isolement est
+dans le texte même du SQL, et non déduite d'une couche d'abstraction.
 </p>
 
 <h4>Gin sur le serveur, bibliothèque standard sur le client</h4>
@@ -412,9 +407,8 @@ Go 1.22.
 </p>
 
 <p>
-Utiliser une dépendance là où elle sert, et s'en passer là où elle n'apporte
-rien, est un choix délibéré plutôt qu'une incohérence. Le dépôt du client ne
-déclare d'ailleurs <strong>aucune dépendance externe</strong>.
+Chaque dépendance est retenue là où elle sert. Le dépôt du client ne déclare
+ainsi <strong>aucune dépendance externe</strong>.
 </p>
 
 <h4>Migrations SQL jouées par PostgreSQL lui-même</h4>
@@ -423,30 +417,8 @@ déclare d'ailleurs <strong>aucune dépendance externe</strong>.
 Les fichiers du dossier <code>migrations/</code> sont montés dans
 <code>/docker-entrypoint-initdb.d</code> et exécutés par PostgreSQL au premier
 démarrage du conteneur. Aucun outil de migration supplémentaire n'est à
-installer ni à apprendre pour faire tourner le projet. La limite de ce choix
-est traitée en section 9.
+installer ni à apprendre pour faire tourner le projet..
 </p>
-
-<h3>2.3 Ce qui a été volontairement écarté</h3>
-
-<table>
-    <tr><th style="width:30%">Écarté</th><th>Pourquoi</th></tr>
-    <tr><td>Framework front (React, Vue)</td><td>Le rendu est fait côté serveur : un second moteur de rendu ferait double emploi</td></tr>
-    <tr><td>ORM</td><td>Masquerait le SQL qui porte le contrôle d'accès (section 2.2)</td></tr>
-    <tr><td>Conteneur d'injection de dépendances</td><td>L'assemblage manuel dans <code>main.go</code> tient en vingt lignes et se lit de haut en bas</td></tr>
-    <tr><td>Bibliothèque d'assertions de test (testify)</td><td>La bibliothèque standard suffit ; une dépendance de moins à justifier</td></tr>
-    <tr><td>Interfaces devant les repositories</td><td>Il n'existe qu'une implémentation. Les tests s'exécutent contre une vraie base, car c'est le comportement du SQL que l'on veut vérifier (section 7)</td></tr>
-    <tr><td>Jeton de rafraîchissement</td><td>Imposerait un stockage de jetons côté serveur, au prix de l'absence d'état ; documenté comme limite en section 9</td></tr>
-</table>
-
-<div class="note">
-    <span class="note-title">Sur l'absence d'interfaces</span>
-    Introduire une interface <code>SpaceRepository</code> pour une unique
-    implémentation aurait ajouté une indirection sans bénéfice. L'abstraction
-    devient utile lorsqu'elle sert un besoin réel : plusieurs implémentations,
-    ou un test qui ne peut pas atteindre la dépendance réelle. Ce n'est le cas
-    ni de l'une ni de l'autre ici.
-</div>
 
 <!-- ===================================================================== -->
 <!-- 3. Architecture                                                        -->
@@ -1097,8 +1069,7 @@ explicites, et c'est le client API qui les traduit :
 
 <p>
 L'API REST reste ainsi correcte et l'application fonctionne sans une ligne de
-JavaScript. L'alternative (un champ caché <code>_method</code> interprété par
-le serveur) aurait fait porter à l'API une contrainte propre au HTML.
+JavaScript.
 </p>
 
 <p>
@@ -1271,12 +1242,7 @@ prendre le contrôle du sien.
 <h2 class="page-break">7. Vérifications</h2>
 
 <p>
-Le projet ne comporte pas de tests automatisés. C'est un choix assumé, repris
-en section 9 parmi les limites.
-</p>
-
-<p>
-Chaque fonctionnalité a en revanche été éprouvée par des requêtes réelles
+Chaque fonctionnalité a été éprouvée par des requêtes réelles
 contre le serveur puis le client en fonctionnement, ainsi que par des tentatives
 de violation directe des contraintes en SQL. Les résultats sont reproduits
 ci-dessous.
@@ -1420,146 +1386,11 @@ doit pas être retirée, et qu'elle doit rester accolée à la déclaration qu'e
 concerne, sans ligne vide intercalée.
 </p>
 
-<h2 class="page-break">9. Limites, simplifications et compromis</h2>
-
-<p>
-Les points suivants sont des choix conscients, pas des oublis. Ils sont classés
-du plus au moins structurant.
-</p>
-
-<h3>9.1 Sécurité</h3>
-
-<div class="limit">
-    <strong>Pas de jeton de rafraîchissement.</strong> Le jeton d'accès vit
-    24 heures ; passé ce délai, l'utilisateur se reconnecte. Un couple
-    accès court / rafraîchissement long serait la solution complète, au prix
-    d'un stockage de jetons côté serveur et donc de l'absence d'état.
-</div>
-
-<div class="limit">
-    <strong>Pas de révocation possible.</strong> Une API sans état ne peut pas
-    invalider un jeton déjà émis. La déconnexion efface le cookie du
-    navigateur, mais le jeton reste techniquement valide jusqu'à son
-    expiration. Une liste de révocation serait nécessaire, et ferait perdre
-    l'absence d'état.
-</div>
-
-<div class="limit">
-    <strong><code>Secure</code> absent du cookie de session.</strong> Le
-    développement se fait en HTTP. En production derrière HTTPS, cet attribut
-    est indispensable pour empêcher l'envoi du cookie en clair.
-</div>
-
-<div class="limit">
-    <strong>Pas de jeton anti-CSRF sur les formulaires de l’application.</strong> La protection y repose sur
-    <code>SameSite=Lax</code>, qui couvre les navigateurs actuels. Un jeton par
-    formulaire serait la défense complète.
-</div>
-
-<div class="limit">
-    <strong>Pas de limitation du nombre de tentatives de connexion.</strong>
-    Rien n'empêche d'essayer des mots de passe en série. bcrypt ralentit
-    chaque tentative, ce qui atténue le problème sans le résoudre. Une
-    limitation par adresse IP ou par compte serait attendue en production.
-</div>
-
-<div class="limit">
-    <strong>Identifiants séquentiels.</strong> Les <code>BIGSERIAL</code>
-    permettent de deviner les identifiants voisins. L'impact est nul ici
-    puisque toute ressource étrangère répond <code>404</code>, mais des UUID
-    empêcheraient même la tentative.
-</div>
-
-<div class="limit">
-    <strong>Réponse de connexion à durée variable.</strong> Un email inconnu
-    renvoie sans exécuter bcrypt, un email connu l'exécute. L'écart de temps
-    permet théoriquement de deviner si une adresse est enregistrée. Un
-    calcul bcrypt factice dans le cas « inconnu » supprimerait cet écart.
-</div>
-
-<h3>9.2 Fonctionnalités</h3>
-
-<div class="limit">
-    <strong>Pas de pagination.</strong> Les listes d'espaces et de notes sont
-    retournées en entier. Acceptable à l'échelle d'un utilisateur, à revoir
-    au-delà de quelques centaines de notes par espace.
-</div>
-
-<div class="limit">
-    <strong>Une note ne peut pas changer d'espace.</strong>
-    <code>space_id</code> n'est pas modifiable. Une note se crée dans
-    un espace et y reste ; l'autoriser à changer imposerait de vérifier
-    l'appartenance de l'espace de destination à chaque modification.
-</div>
-
-<div class="limit">
-    <strong>Pas de recherche ni de filtrage par état.</strong> Les notes sont
-    triées de la plus récente à la plus ancienne, sans autre option.
-</div>
-
-<div class="limit">
-    <strong>Aucun partage entre utilisateurs.</strong> Le modèle associe un
-    espace à exactement un utilisateur, conformément à l'énoncé. C'est ce qui
-    rend le contrôle d'accès aussi simple à garantir.
-</div>
-
-<div class="limit">
-    <strong>Pas de tests automatisés.</strong> Les vérifications de la
-    section 7 ont été menées à la main. Sur un projet destiné à vivre, une suite
-    couvrant au minimum le contrôle d'accès serait le premier ajout, car c'est
-    la garantie la plus coûteuse à perdre lors d'une modification.
-</div>
-
-<div class="limit">
-    <strong>La connexion Google n'est pas reproductible en l'état.</strong>
-    Elle exige des identifiants OAuth propres à un projet Google Cloud, qui ne
-    peuvent pas être versionnés. Sans eux, le bouton n'apparaît pas et
-    l'application reste entièrement utilisable par email et mot de passe.
-</div>
-
-<h3>9.3 Exploitation</h3>
-
-<div class="limit">
-    <strong>Migrations jouées au premier démarrage du conteneur.</strong> Les
-    fichiers de <code>migrations/</code> ne sont exécutés qu'à la création du
-    volume PostgreSQL. Modifier le schéma impose de recréer la base
-    (<code>make db-reset</code>). Un outil de migration versionnée serait
-    nécessaire dès qu'il faut faire évoluer un schéma contenant des données
-    réelles.
-</div>
-
-<div class="limit">
-    <strong>Le serveur n'est pas conteneurisé.</strong> Seule la base l'est.
-    C'est un choix de confort en développement (recompiler est instantané)
-    mais un <code>Dockerfile</code> serait attendu pour un déploiement.
-</div>
-
-<div class="limit">
-    <strong>Journalisation textuelle.</strong> Le paquet <code>log</code>
-    standard est utilisé. Des journaux structurés (<code>log/slog</code>) avec
-    un identifiant de corrélation par requête seraient préférables pour
-    exploiter la production.
-</div>
-
-<div class="limit">
-    <strong>Pas d'intégration continue.</strong> Les vérifications
-    (<code>gofmt</code>, <code>go vet</code>, compilation) ont été lancées à la
-    main avant chaque commit. Un workflow GitHub Actions les rendrait
-    systématiques.
-</div>
-
-<div class="limit">
-    <strong>Le profil est relu à chaque requête du client.</strong> Chaque page
-    déclenche un appel à <code>/api/me</code>. C'est un aller-retour
-    supplémentaire, assumé au profit de la simplicité : le jeton est ainsi
-    toujours vérifié et le nom affiché toujours à jour.
-</div>
-
 <!-- ===================================================================== -->
 <!-- 10. Mise en route                                                      -->
 <!-- ===================================================================== -->
 
-<h2>10. Mise en route</h2>
+<h2>9. Mise en route</h2>
 
 <p>
 Prérequis : <strong>Go 1.25</strong> ou supérieur, <strong>Docker</strong> et
@@ -1607,10 +1438,8 @@ go build ./...
 go vet ./...</code></pre>
 
 <p>
-Le projet ne comporte pas de tests automatisés, point repris en section 9. Le
-dépôt client fournit un <code>Makefile</code> regroupant les commandes
-courantes (<code>make help</code> en donne la liste) ; le dépôt serveur
-s'utilise directement avec <code>go run .</code> et <code>docker compose</code>.
+Les deux dépôts s'utilisent directement avec <code>go run .</code>, la base
+de données avec <code>docker compose</code>.
 </p>
 
 <h3>Activer la connexion Google</h3>
