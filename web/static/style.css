@@ -1,12 +1,5 @@
-/* Système de design inspiré d'Apple : typographie SF, matériaux translucides, surfaces sans bordure */
 
-/* ========================================================================== */
 /* 1. Police                                                                  */
-/* ========================================================================== */
-
-/* SF Pro n'est pas redistribuable sur le web. Inter en est la substitution de
-   référence : mêmes principes néo-grotesques humanistes, grande hauteur d'x.
-   Le fichier est hébergé dans le projet, aucune requête vers un tiers. */
 @font-face {
     font-family: "Inter";
     font-style: normal;
@@ -18,10 +11,7 @@
         U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* ========================================================================== */
 /* 2. Tokens                                                                  */
-/* ========================================================================== */
-
 :root {
     color-scheme: light dark;
 
@@ -162,9 +152,7 @@
     }
 }
 
-/* ========================================================================== */
 /* 3. Base                                                                    */
-/* ========================================================================== */
 
 *,
 *::before,
@@ -230,9 +218,7 @@ code {
     background: var(--accent-soft);
 }
 
-/* ========================================================================== */
 /* 4. Mise en page                                                            */
-/* ========================================================================== */
 
 .container {
     width: 100%;
@@ -246,7 +232,6 @@ code {
     padding-block: var(--space-12) var(--space-20);
 }
 
-/* En-tête translucide : le matériau signature d'Apple */
 .site-header {
     position: sticky;
     top: 0;
@@ -320,7 +305,6 @@ code {
     letter-spacing: 0;
 }
 
-/* Grand titre de page, à la manière des applications système */
 .page-header {
     display: flex;
     align-items: flex-end;
@@ -357,9 +341,7 @@ code {
 .breadcrumb a:hover { color: var(--accent); text-decoration: none; }
 .breadcrumb-sep { opacity: 0.35; }
 
-/* ========================================================================== */
 /* 5. Boutons                                                                 */
-/* ========================================================================== */
 
 .button {
     display: inline-flex;
@@ -442,9 +424,7 @@ code {
     stroke-linejoin: round;
 }
 
-/* ========================================================================== */
 /* 6. Surfaces                                                                */
-/* ========================================================================== */
 
 .card {
     background: var(--surface);
@@ -495,7 +475,6 @@ code {
 .space-name a { color: var(--ink); }
 .space-name a:hover { text-decoration: none; }
 
-/* Le lien couvre la carte entière, les actions restent cliquables au-dessus */
 .space-name a::after {
     content: "";
     position: absolute;
@@ -537,9 +516,7 @@ code {
     font-variant-numeric: tabular-nums;
 }
 
-/* ========================================================================== */
 /* 7. Avancement                                                              */
-/* ========================================================================== */
 
 .space-stats {
     display: flex;
@@ -569,9 +546,7 @@ code {
 
 .space-stats .meta { white-space: nowrap; }
 
-/* ========================================================================== */
 /* 8. Board                                                                   */
-/* ========================================================================== */
 
 .board {
     display: grid;
@@ -629,7 +604,6 @@ code {
     font-variant-numeric: tabular-nums;
 }
 
-/* La zone de dépôt occupe la hauteur restante, la cible reste large même à vide */
 .column-body {
     display: flex;
     flex: 1;
@@ -640,7 +614,6 @@ code {
 
 .column-footer { padding: var(--space-3); }
 
-/* La colonne vide reste une grande cible de dépôt sans pour autant peser à l'écran */
 .column-empty {
     display: grid;
     place-items: center;
@@ -676,9 +649,7 @@ code {
     to { transform: scaleX(1); opacity: 1; }
 }
 
-/* ========================================================================== */
 /* 9. Carte de note                                                           */
-/* ========================================================================== */
 
 .note {
     position: relative;
@@ -792,9 +763,7 @@ code {
     gap: 2px;
 }
 
-/* ========================================================================== */
 /* 10. Badges                                                                 */
-/* ========================================================================== */
 
 .badge {
     display: inline-flex;
@@ -819,9 +788,7 @@ code {
 .badge-in_progress { color: var(--status-progress); background: var(--status-progress-soft); }
 .badge-done { color: var(--status-done); background: var(--status-done-soft); }
 
-/* ========================================================================== */
 /* 11. Formulaires                                                            */
-/* ========================================================================== */
 
 .form {
     display: flex;
@@ -911,7 +878,6 @@ select {
     gap: var(--space-3);
 }
 
-/* Sélecteur segmenté façon iOS */
 .segmented {
     display: grid;
     grid-auto-flow: column;
@@ -958,11 +924,8 @@ select {
     outline-offset: 1px;
 }
 
-/* ========================================================================== */
 /* 12. Alertes                                                                */
-/* ========================================================================== */
 
-/* Le message s'efface seul au bout de quatre secondes, sans dépendre de JavaScript */
 .alert {
     display: flex;
     align-items: center;
@@ -978,7 +941,6 @@ select {
         alert-out 420ms var(--ease-out) 4s forwards;
 }
 
-/* Le survol suspend le retrait, le temps de finir de lire */
 .alert:hover {
     animation-play-state: paused;
 }
@@ -1002,9 +964,7 @@ select {
 .alert-success { color: var(--success-ink); background: var(--success-bg); }
 .alert-error { color: var(--error-ink); background: var(--error-bg); }
 
-/* ========================================================================== */
 /* 13. États vides, authentification, erreur                                  */
-/* ========================================================================== */
 
 .empty-state {
     max-width: 520px;
@@ -1124,9 +1084,7 @@ select {
     color: var(--ink-secondary);
 }
 
-/* ========================================================================== */
 /* 14. Responsive                                                             */
-/* ========================================================================== */
 
 @media (max-width: 920px) {
     .board { grid-template-columns: 1fr; }
@@ -1153,9 +1111,7 @@ select {
     .space-actions { opacity: 1; }
 }
 
-/* ========================================================================== */
 /* 15. Accessibilité                                                          */
-/* ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
     *,
@@ -1180,13 +1136,10 @@ select {
     border: 0;
 }
 
-/* Les affordances de glisser n'apparaissent qu'avec JavaScript actif */
 .no-js .note { cursor: default; }
 .no-js [data-js-only] { display: none !important; }
 
-/* ========================================================================== */
 /* 16. Connexion par un fournisseur tiers                                     */
-/* ========================================================================== */
 
 .auth-divider {
     display: flex;
@@ -1224,9 +1177,7 @@ select {
     flex: none;
 }
 
-/* ========================================================================== */
 /* 17. Identité et couleur par espace                                         */
-/* ========================================================================== */
 
 .logo-mark {
     width: 28px;
@@ -1241,7 +1192,6 @@ select {
     letter-spacing: var(--track-title);
 }
 
-/* Huit teintes du système Apple, attribuées à un espace d'après son nom */
 [data-palette="1"] { --tone: #0a84ff; --tone-soft: rgba(10, 132, 255, 0.14); }
 [data-palette="2"] { --tone: #30c85e; --tone-soft: rgba(48, 200, 94, 0.14); }
 [data-palette="3"] { --tone: #ff9f0a; --tone-soft: rgba(255, 159, 10, 0.16); }
@@ -1251,7 +1201,6 @@ select {
 [data-palette="7"] { --tone: #ff6482; --tone-soft: rgba(255, 100, 130, 0.14); }
 [data-palette="8"] { --tone: #ac8e68; --tone-soft: rgba(172, 142, 104, 0.16); }
 
-/* Pastille portant l'initiale de l'espace, à la manière des listes de Rappels */
 .space-tile {
     display: grid;
     place-items: center;
@@ -1280,7 +1229,6 @@ select {
     gap: var(--space-4);
 }
 
-/* Halo coloré très discret, révélé au survol de la carte */
 .space-glow {
     position: absolute;
     inset: 0;
@@ -1312,21 +1260,17 @@ select {
 
 .space-card:hover .space-open .icon { transform: translateX(3px); }
 
-/* La colonne « Terminé » emprunte la teinte de l'espace sur la page de détail */
 .page-header[data-palette] .page-title {
     background: none;
 }
 
-/* ========================================================================== */
 /* 18. Fond travaillé des pages d'authentification                            */
-/* ========================================================================== */
 
 .auth-layout {
     position: relative;
     isolation: isolate;
 }
 
-/* Deux halos diffus donnent de la profondeur sans image ni dépendance */
 .auth-layout::before,
 .auth-layout::after {
     content: "";
@@ -1378,12 +1322,8 @@ select {
     border-radius: 15px;
 }
 
-/* ========================================================================== */
 /* 19. Fenêtre de confirmation                                                */
-/* ========================================================================== */
 
-/* L'élément dialog natif apporte le piégeage du focus, la touche Échap et
-   l'inertisation de l'arrière-plan, sans une ligne de JavaScript pour cela. */
 .modal {
     width: min(92vw, 400px);
     padding: 0;
@@ -1464,7 +1404,6 @@ select {
     margin-top: var(--space-5);
 }
 
-/* Bouton d'action destructrice, plein et non discret : il doit se distinguer d'Annuler */
 .button-destructive {
     color: #fff;
     background: var(--danger);

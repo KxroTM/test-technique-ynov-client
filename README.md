@@ -34,8 +34,9 @@ Trois points structurent cette architecture :
 | Langage         | Go 1.25              | Imposé par le sujet |
 | Gabarits        | `html/template`      | Imposé par le sujet ; échappement contextuel automatique |
 | Routeur         | `net/http` (stdlib)  | Depuis Go 1.22, la stdlib gère méthode et paramètres d'URL |
-| Style           | CSS écrit à la main  | Le sujet porte sur Go, pas sur le front |
-| JavaScript      | Aucun (hors `confirm`) | L'application fonctionne entièrement sans JS |
+| Style           | CSS écrit à la main  | Système de tokens, thèmes clair et sombre |
+| Police          | Inter, hébergée localement | Substitution à SF Pro, aucune requête vers un tiers |
+| JavaScript      | Aucune bibliothèque | Glisser-déposer et fenêtre de confirmation, en enrichissement seul |
 
 **Ce dépôt n'a aucune dépendance externe.** Le fichier `go.mod` ne déclare
 aucun `require` : tout repose sur la bibliothèque standard. Un routeur tiers
@@ -65,7 +66,20 @@ cp .env.example .env
 Les valeurs par défaut conviennent à un environnement local : aucune
 modification n'est nécessaire si le serveur écoute sur le port `8080`.
 
-### 3. Lancer le client
+
+### 3. Activer la connexion Google (facultatif)
+
+Renseigner dans `.env` l'identifiant public du client OAuth, le même que celui
+du serveur :
+
+```
+GOOGLE_CLIENT_ID=...
+```
+
+Sans cette variable, le bouton n'apparaît pas. Le secret, lui, ne concerne que
+le serveur et ne doit jamais figurer ici.
+
+### 4. Lancer le client
 
 ```bash
 go run .
@@ -98,13 +112,18 @@ appartenant à l'autre compte.
 |-------|---------|----------------|
 | Connexion | `/login` | FT1 |
 | Inscription | `/register` | FT1 |
+| Connexion Google | `/auth/google` | FT1, facultatif |
 | Liste des espaces | `/spaces` | FT2 |
 | Création d'un espace | `/spaces/new` | FT2 |
 | Modification d'un espace | `/spaces/{id}/edit` | FT2 |
-| Détail d'un espace et ses notes | `/spaces/{id}` | FT2, FT3 |
+| Board d'un espace | `/spaces/{id}` | FT2, FT3 |
 | Ajout d'une note | `/spaces/{id}/notes/new` | FT4 |
 | Modification d'une note | `/notes/{id}/edit` | FT5 |
+| Changement d'état d'une note | `POST /notes/{id}/status` | FT5 |
 | Suppression d'une note | `POST /notes/{id}/delete` | FT6 |
+
+Les notes d'un espace ne sont pas présentées en liste mais en **board** : une
+colonne par état, une carte par note. Déplacer une carte change son état.
 
 ## Commandes utiles
 
@@ -158,20 +177,84 @@ main.go             Point d'entrée : assemblage et démarrage
 internal/
   api/              Client HTTP typé vers le serveur (le seul à connaître l'API)
   config/           Configuration depuis l'environnement
-  handlers/         Handlers de pages, routes, session requise
+  handlers/         Handlers de pages, routes, session requise, flux Google
   render/           Compilation et exécution des gabarits
   session/          Cookie de session portant le jeton JWT
 web/
   templates/        Layout, partials et pages
-  static/           Feuille de style
+  static/
+    style.css       Système de design : tokens, thèmes clair et sombre
+    board.js        Glisser-déposer des notes entre colonnes
+    confirm.js      Fenêtre de confirmation avant suppression
+    fonts/          Police Inter, hébergée dans le projet
   embed.go          Embarque templates/ et static/ dans le binaire
 ```
 
-Le binaire est **autonome** : les gabarits et le CSS sont embarqués avec
-`go:embed`. Il n'y a pas besoin de déployer le dossier `web/` à côté de
-l'exécutable.
+Le binaire est **autonome** : gabarits, CSS, scripts et police sont embarqués
+avec `go:embed`. Il n'y a pas besoin de déployer le dossier `web/` à côté de
+l'exécutable, ni d'appeler un service tiers au chargement des pages.
 
 ## Partis pris d'implémentation
+
+### Le board, et le déplacement sans JavaScript
+
+Les trois états d'une note correspondent exactement à trois colonnes. Déplacer
+une carte change son état, par deux chemins qui aboutissent au même résultat :
+
+| Moyen | Mécanisme |
+|-------|-----------|
+| Sans JavaScript | Deux flèches sur la carte, formulaire `POST`, redirection `303` |
+| Avec JavaScript | Glisser-déposer, `fetch` en arrière-plan, réponse `204` |
+
+Le serveur rend déjà les flèches dans le bon sens : une carte « Non fait »
+masque sa flèche gauche, une carte « Terminé » masque sa droite. Le script ne
+contient **aucun libellé ni ordre d'états codé en dur**, il les lit dans le HTML
+produit par Go. Si l'appel échoue, la carte revient à sa place, la jauge
+d'avancement est restaurée et un message apparaît.
+
+### Une fenêtre de confirmation plutôt que celle du navigateur
+
+Les suppressions passent par l'élément natif `<dialog>`, qui apporte le
+piégeage du focus, la touche Échap et l'inertisation de l'arrière-plan sans
+avoir à les réécrire. Le texte reste dans les gabarits, porté par des attributs
+`data-confirm` ; le script est générique et ne connaît aucun libellé.
+
+Sur un navigateur sans support de `<dialog>`, le formulaire s'envoie
+directement : la suppression reste possible plutôt que d'être silencieusement
+bloquée.
+
+### Les messages s'effacent seuls, en CSS
+
+Un message de confirmation disparaît au bout de quatre secondes par une
+animation CSS, et non par un minuteur JavaScript : le comportement est donc le
+même avec ou sans script. Le survol suspend le retrait, le temps de finir de
+lire. L'animation replie aussi la hauteur et les marges, sans quoi un espace
+vide resterait dans la page.
+
+### Un système de design plutôt qu'une feuille de style
+
+Le CSS repose sur une centaine de variables décrivant couleurs, échelle
+typographique, espacements, rayons et courbes d'animation. Les composants ne
+référencent que ces variables, jamais une valeur littérale. Le **thème sombre**
+se limite donc à redéfinir les variables sous `prefers-color-scheme`.
+
+La police **Inter** est hébergée dans le projet et embarquée dans le binaire.
+Elle sert de substitution à SF Pro, qui n'est pas redistribuable sur le web.
+Aucune requête n'est faite vers un service tiers, et l'application reste
+identique hors ligne.
+
+Toute animation est neutralisée sous `prefers-reduced-motion`.
+
+### Connexion Google
+
+Le client redirige vers Google avec le `client_id`, qui est public, mais c'est
+**l'API qui possède l'authentification** : elle seule détient le `client_secret`,
+échange le code et émet le JWT. Un paramètre `state` aléatoire, déposé en cookie
+et comparé en temps constant au retour, garantit que la réponse de Google
+correspond à une demande réellement initiée depuis ce navigateur.
+
+Sans identifiants configurés, le bouton n'apparaît pas et la connexion par mot
+de passe reste inchangée.
 
 ### Les formulaires HTML ne savent faire que GET et POST
 
@@ -263,3 +346,13 @@ donc comme du texte, sans traitement particulier à écrire.
 - **Le profil est relu à chaque requête** (un appel à `/api/me`). C'est un
   aller-retour supplémentaire, assumé au profit de la simplicité : le jeton est
   ainsi toujours vérifié et le nom affiché toujours à jour.
+
+- **La connexion Google n'est pas testable sans identifiants OAuth.** Elle exige
+  un projet Google Cloud propre à celui qui l'exécute. Sans les variables
+  correspondantes, le bouton n'apparaît pas et l'application reste entièrement
+  utilisable par email et mot de passe.
+- **Le glisser-déposer demande un pointeur.** Au clavier ou sur mobile, le
+  déplacement se fait par les flèches de la carte, qui restent le chemin de
+  référence.
+- **Sans JavaScript, la suppression ne demande pas de confirmation.** Une page
+  de confirmation rendue par le serveur serait la réponse complète.

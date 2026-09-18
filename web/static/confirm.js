@@ -1,6 +1,3 @@
-// Remplace la boîte de dialogue du navigateur par une fenêtre modale aux couleurs de l'application.
-// Sans ce script, les formulaires marqués data-confirm s'envoient directement.
-
 (function () {
     "use strict";
 
@@ -30,7 +27,6 @@
         dialog.showModal();
     });
 
-    // Un clic sur le fond ferme la fenêtre, comme le ferait la touche Échap
     dialog.addEventListener("click", function (event) {
         if (event.target === dialog) {
             dialog.close("cancel");
@@ -45,7 +41,6 @@
             return;
         }
 
-        // submit() n'émet pas d'évènement submit, l'interception ne se redéclenche donc pas
         form.submit();
     });
 })();

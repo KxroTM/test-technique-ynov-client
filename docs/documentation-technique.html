@@ -301,6 +301,7 @@ svg { display: block; margin: 0 auto; }
                 <li>Gestion des états de note</li>
                 <li>Contraintes propres au client HTML</li>
                 <li>Consultation des notes sous forme de board</li>
+                <li>Système de design du client</li>
                 <li>Connexion par compte Google</li>
             </ol>
         </li>
@@ -1202,7 +1203,45 @@ HTML produit par Go. En cas d'échec réseau, la carte revient à sa place, la
 jauge d'avancement est restaurée et un message apparaît.
 </p>
 
-<h3>6.9 Connexion par compte Google</h3>
+<h3>6.9 Système de design du client</h3>
+
+<p>
+La feuille de style n'est pas une suite de règles mais un système : une
+centaine de variables décrivent les couleurs, l'échelle typographique, les
+espacements, les rayons et les courbes d'animation. Les composants ne
+référencent que ces variables, jamais une valeur littérale.
+</p>
+
+<p>
+La conséquence tient en une ligne : le <strong>thème sombre</strong> se réduit à
+redéfinir les variables sous <code>prefers-color-scheme</code>, sans toucher à
+une seule règle de composant. Sans cette discipline, il aurait fallu dupliquer
+chaque déclaration de couleur.
+</p>
+
+<table>
+    <tr><th style="width:30%">Choix</th><th>Raison</th></tr>
+    <tr><td>Police Inter, hébergée dans le projet</td><td>SF Pro n'est pas redistribuable sur le web. Inter en est la substitution de référence, et l'héberger évite toute requête vers un tiers</td></tr>
+    <tr><td>Échelle typographique d'Apple</td><td>Corps à 17 px, la valeur des systèmes iOS et macOS, avec un crénage qui se resserre à mesure que le corps grandit</td></tr>
+    <tr><td>Surfaces sans bordure</td><td>La séparation vient du contraste de surface et d'une ombre très douce, plutôt que d'un trait d'un pixel</td></tr>
+    <tr><td>Une teinte par espace</td><td>Dérivée du nom par hachage, donc stable d'un affichage à l'autre, sans colonne supplémentaire en base</td></tr>
+</table>
+
+<div class="note">
+    <span class="note-title">Accessibilité</span>
+    Toute animation est neutralisée sous <code>prefers-reduced-motion</code>.
+    Le focus clavier reste visible partout, et les libellés des actions sur les
+    cartes sont doublés d'un texte lu par les lecteurs d'écran, les icônes
+    seules ne suffisant pas.
+</div>
+
+<p>
+La police pèse 48 Ko et n'embarque que le sous-ensemble latin, suffisant pour le
+français, accents et guillemets compris. Elle est embarquée dans le binaire au
+même titre que les gabarits.
+</p>
+
+<h3>6.10 Connexion par compte Google</h3>
 
 <p>
 Fonctionnalité facultative, activée par la présence d'identifiants OAuth. La

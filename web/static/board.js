@@ -1,6 +1,3 @@
-// Glisser-déposer des notes entre colonnes, en enrichissement du board rendu par le serveur.
-// Sans ce script, les flèches de chaque carte déplacent la note par formulaire classique.
-
 (function () {
     "use strict";
 
@@ -12,7 +9,6 @@
     let dragged = null;
     let placeholder = null;
 
-    // L'ordre et les libellés des états sont lus dans le HTML rendu par le serveur, jamais recopiés ici
     const order = [...board.querySelectorAll(".column")].map(function (column) {
         return column.dataset.status;
     });
@@ -22,14 +18,12 @@
         labels[column.dataset.status] = column.querySelector(".column-title").textContent.trim();
     });
 
-    // createPlaceholder construit le trait bleu qui marque la position de dépôt
     function createPlaceholder() {
         const element = document.createElement("div");
         element.className = "drop-placeholder";
         return element;
     }
 
-    // cardAfterPoint retourne la carte devant laquelle insérer, d'après la position verticale du curseur
     function cardAfterPoint(zone, y) {
         const cards = [...zone.querySelectorAll(".note:not(.is-dragging)")];
 
@@ -46,7 +40,6 @@
         ).element;
     }
 
-    // refreshColumn remet à jour le compteur et l'état vide d'une colonne
     function refreshColumn(column) {
         const zone = column.querySelector("[data-dropzone]");
         const count = zone.querySelectorAll(".note").length;
@@ -68,7 +61,6 @@
         }
     }
 
-    // refreshProgress recalcule la jauge d'avancement, en reproduisant la division entière faite en Go
     function refreshProgress() {
         const bar = document.querySelector("[data-progress-bar]");
         if (!bar) {
@@ -101,13 +93,11 @@
         }
     }
 
-    // refreshAllColumns rafraîchit les trois colonnes et la jauge après un déplacement
     function refreshAllColumns() {
         board.querySelectorAll(".column").forEach(refreshColumn);
         refreshProgress();
     }
 
-    // syncCardControls réoriente les flèches de la carte après son changement d'état
     function syncCardControls(card, status) {
         const index = order.indexOf(status);
 
@@ -124,7 +114,6 @@
         });
     }
 
-    // showError affiche un bandeau d'erreur temporaire au-dessus du board
     function showError(message) {
         const container = board.parentNode;
         const existing = container.querySelector("[data-board-error]");
@@ -141,7 +130,6 @@
         container.insertBefore(alert, board);
     }
 
-    // persistStatus enregistre le nouvel état auprès du serveur et remet la carte en place en cas d'échec
     async function persistStatus(card, status, restore) {
         card.classList.add("is-pending");
 
