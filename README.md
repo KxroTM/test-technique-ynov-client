@@ -159,7 +159,7 @@ go vet ./...
 
 Le document `docs/documentation-technique.pdf` couvre l'ensemble de la solution,
 serveur et client : choix techniques, architecture, modélisation, partis pris
-d'implémentation et vérifications. Il est identique dans les deux dépôts.
+d'implémentation, vérifications et compromis retenus. Il est identique dans les deux dépôts.
 
 ## Structure du projet
 
