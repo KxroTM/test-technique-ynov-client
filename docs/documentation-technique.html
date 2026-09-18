@@ -1322,7 +1322,7 @@ l'application :
     <tr><td>Déplacement d'une note sans JavaScript</td><td>Flèches de la carte, formulaire classique, <code>303</code></td></tr>
     <tr><td>Déplacement par glisser avec JavaScript</td><td><code>204</code>, colonnes, compteurs et jauge mis à jour</td></tr>
     <tr><td>Échec réseau pendant un glisser</td><td>Carte remise en place, jauge restaurée, message affiché</td></tr>
-    <tr><td>Retour Google sans jeton anti-rejeu valide</td><td>Refus et retour à la connexion</td></tr>
+    <tr><td>Retour Google sans jeton anti-CSRF valide</td><td>Refus et retour à la connexion</td></tr>
 </table>
 
 <h2>8. Méthode de travail et versionnement</h2>
@@ -1414,7 +1414,7 @@ du plus au moins structurant.
 </div>
 
 <div class="limit">
-    <strong>Pas de jeton anti-CSRF dédié.</strong> La protection repose sur
+    <strong>Pas de jeton anti-CSRF sur les formulaires de l’application.</strong> La protection y repose sur
     <code>SameSite=Lax</code>, qui couvre les navigateurs actuels. Un jeton par
     formulaire serait la défense complète.
 </div>

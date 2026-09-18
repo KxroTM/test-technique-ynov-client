@@ -15,7 +15,7 @@ import (
 // googleAuthEndpoint est la page de consentement vers laquelle l'utilisateur est redirigé
 const googleAuthEndpoint = "https://accounts.google.com/o/oauth2/v2/auth"
 
-// stateCookieName porte le jeton anti-rejeu le temps de l'aller-retour vers Google
+// stateCookieName porte le jeton anti-CSRF qui lie la demande de connexion à son retour
 const stateCookieName = "google_state"
 
 // StartGoogleLogin redirige l'utilisateur vers la page de consentement Google
@@ -131,7 +131,7 @@ func stateMatches(r *http.Request) bool {
 	return subtle.ConstantTimeCompare([]byte(cookie.Value), []byte(returned)) == 1
 }
 
-// clearStateCookie retire le cookie anti-rejeu
+// clearStateCookie retire le jeton anti-CSRF, sans usage après le retour
 func clearStateCookie(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     stateCookieName,
