@@ -31,8 +31,8 @@ Trois points structurent cette architecture :
 
 | Composant       | Choix                | Raison |
 |-----------------|----------------------|--------|
-| Langage         | Go 1.25              | Imposé par le sujet |
-| Gabarits        | `html/template`      | Imposé par le sujet ; échappement contextuel automatique |
+| Langage         | Go 1.25              | Même langage que le serveur, binaire autonome |
+| Gabarits        | `html/template`      | Rendu côté serveur, échappement contextuel automatique |
 | Routeur         | `net/http` (stdlib)  | Depuis Go 1.22, la stdlib gère méthode et paramètres d'URL |
 | Style           | CSS écrit à la main  | Système de tokens, thèmes clair et sombre |
 | Police          | Inter, hébergée localement | Substitution à SF Pro, aucune requête vers un tiers |
@@ -41,7 +41,8 @@ Trois points structurent cette architecture :
 **Ce dépôt n'a aucune dépendance externe.** Le fichier `go.mod` ne déclare
 aucun `require` : tout repose sur la bibliothèque standard. Un routeur tiers
 n'apportait rien pour une quinzaine de routes, et un framework CSS aurait
-ajouté du bruit dans les gabarits sans répondre au sujet.
+alourdi les gabarits pour un résultat que le CSS écrit à la main atteint
+directement.
 
 ## Prérequis
 
@@ -108,19 +109,19 @@ appartenant à l'autre compte.
 
 ## Fonctionnalités
 
-| Écran | Adresse | Fonctionnalité |
-|-------|---------|----------------|
-| Connexion | `/login` | FT1 |
-| Inscription | `/register` | FT1 |
-| Connexion Google | `/auth/google` | FT1, facultatif |
-| Liste des espaces | `/spaces` | FT2 |
-| Création d'un espace | `/spaces/new` | FT2 |
-| Modification d'un espace | `/spaces/{id}/edit` | FT2 |
-| Board d'un espace | `/spaces/{id}` | FT2, FT3 |
-| Ajout d'une note | `/spaces/{id}/notes/new` | FT4 |
-| Modification d'une note | `/notes/{id}/edit` | FT5 |
-| Changement d'état d'une note | `POST /notes/{id}/status` | FT5 |
-| Suppression d'une note | `POST /notes/{id}/delete` | FT6 |
+| Écran | Adresse |
+|-------|---------|
+| Connexion | `/login` |
+| Inscription | `/register` |
+| Connexion Google | `/auth/google` |
+| Liste des espaces | `/spaces` |
+| Création d'un espace | `/spaces/new` |
+| Modification d'un espace | `/spaces/{id}/edit` |
+| Board d'un espace | `/spaces/{id}` |
+| Ajout d'une note | `/spaces/{id}/notes/new` |
+| Modification d'une note | `/notes/{id}/edit` |
+| Changement d'état d'une note | `POST /notes/{id}/status` |
+| Suppression d'une note | `POST /notes/{id}/delete` |
 
 Les notes d'un espace ne sont pas présentées en liste mais en **board** : une
 colonne par état, une carte par note. Déplacer une carte change son état.
@@ -139,9 +140,8 @@ directement (`go run .`, `go build ./...`).
 
 ## Vérifications
 
-Le projet ne comporte pas de tests automatisés, qui ne figurent pas parmi les
-attendus du sujet. Les contrôles ont été faits manuellement dans le navigateur
-et par requêtes directes :
+Les contrôles suivants ont été menés dans le navigateur et par requêtes
+directes :
 
 | Contrôle | Résultat attendu |
 |----------|------------------|
